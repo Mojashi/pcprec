@@ -1,0 +1,4 @@
+digraph {
+"MidWild(MidWildSequence { front_wild: true, front: 0110101, back: , dir: UP })" -> {"MidWild(MidWildSequence { front_wild: false, front: 0101, back: 1, dir: UP })"}
+"MidWild(MidWildSequence { front_wild: false, front: 0101, back: 1, dir: UP })" -> {}
+}

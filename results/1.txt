@@ -1,0 +1,3 @@
+PCP { tiles: [Tile { up: "1111", dn: "110" }, Tile { up: "1101", dn: "1" }, Tile { up: "1", dn: "1111" }] }
+[]
+[]
