@@ -1,3 +1,7 @@
 {
-    "lldb.cargo": "/Users/digital/.cargo/bin/cargo"
+    "lldb.cargo": "/Users/digital/.cargo/bin/cargo",
+    "rust-analyzer.linkedProjects": [
+        "./Cargo.toml",
+        "./Cargo.toml"
+    ]
 }

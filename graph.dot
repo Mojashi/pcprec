@@ -1,4 +1,16 @@
 digraph {
-"MidWild(MidWildSequence { front_wild: true, front: 0110101, back: , dir: UP })" -> {"MidWild(MidWildSequence { front_wild: false, front: 0101, back: 1, dir: UP })"}
-"MidWild(MidWildSequence { front_wild: false, front: 0101, back: 1, dir: UP })" -> {}
+"MidWild(MidWildSequence { front_wild: true, front: 110111011011, back: , dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 011, dir: DN })""MidWild(MidWildSequence { front_wild: false, front: 10111011011, back: 011, dir: DN })""MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 1, dir: DN })""MidWild(MidWildSequence { front_wild: false, front: 10111011011, back: 1, dir: DN })""MidWild(MidWildSequence { front_wild: false, front: 10111011011, back: 1111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 011, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 0111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 10111011011, back: 011, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 0111111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 1, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 11, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 10111011011, back: 1, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 11111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 10111011011, back: 1111, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 11111111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 0111, dir: DN })" -> {}
+"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 0111111, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 01111111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 11, dir: DN })" -> {}
+"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 11111, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 111111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 0111011011, back: 11111111, dir: DN })" -> {"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 111111111, dir: DN })"}
+"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 01111111, dir: DN })" -> {}
+"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 111111, dir: DN })" -> {}
+"MidWild(MidWildSequence { front_wild: false, front: 011011, back: 111111111, dir: DN })" -> {}
 }
