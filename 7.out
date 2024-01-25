@@ -1,0 +1,659 @@
+12 pcp: PCP { tiles: [Tile { up: "1111", dn: "11" }, Tile { up: "1", dn: "1101" }, Tile { up: "0", dn: "1" }] }
+visited: 15742
+upper true: "00"
+upper true: "010"
+upper true: "01111011110"
+upper true: "1111111111111"
+upper true: "11111111110111"
+upper true: "11111111111011"
+lower true: "01110"
+lower true: "011111110"
+visited: 15742
+MidExact(MidExactSequence { mid: "00", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01111011110", dir: UP }), MidExact(MidExactSequence { mid: "1111111111111", dir: UP }), MidExact(MidExactSequence { mid: "11111111110111", dir: UP }), MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "01111011110", dir: UP }), MidExact(MidExactSequence { mid: "1111111111111", dir: UP }), MidExact(MidExactSequence { mid: "11111111110111", dir: UP }), MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "01111011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "1111111111111", dir: UP }), MidExact(MidExactSequence { mid: "11111111110111", dir: UP }), MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1111111111111", dir: UP }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01111011110", dir: UP }), MidExact(MidExactSequence { mid: "11111111110111", dir: UP }), MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "1111111111111", dir: UP })
+MidExact(MidExactSequence { mid: "00", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01111011110", dir: UP }), MidExact(MidExactSequence { mid: "11111111110111", dir: UP }), MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "00", dir: UP })
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "01111011110", dir: UP }), MidExact(MidExactSequence { mid: "11111111110111", dir: UP }), MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "010", dir: UP })
+MidExact(MidExactSequence { mid: "01111011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "11111111110111", dir: UP }), MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "01111011110", dir: UP })
+MidExact(MidExactSequence { mid: "11111111110111", dir: UP }) vs [MidExact(MidExactSequence { mid: "11111111111011", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "11111111110111", dir: UP })
+MidExact(MidExactSequence { mid: "11111111111011", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "11111111111011", dir: UP })
+MidExact(MidExactSequence { mid: "01110", dir: DN }) vs [MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+all ok
+13 pcp: PCP { tiles: [Tile { up: "1111", dn: "11" }, Tile { up: "1", dn: "110" }, Tile { up: "0", dn: "111" }] }
+visited: 14519
+upper true: "0"
+upper true: "1"
+lower true: "0110"
+lower true: "011111110"
+visited: 14519
+MidExact(MidExactSequence { mid: "0", dir: UP }) vs [MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1", dir: UP }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+all ok
+14 pcp: PCP { tiles: [Tile { up: "1111", dn: "10" }, Tile { up: "0111", dn: "1" }, Tile { up: "1", dn: "1111" }] }
+visited: 14883
+upper true: "01110"
+upper true: "011110"
+upper true: "011111110"
+upper true: "0111111110"
+lower true: "010"
+lower true: "0110"
+lower true: "011111101111"
+lower true: "0111110111110"
+lower true: "01111101111110"
+visited: 14883
+MidExact(MidExactSequence { mid: "01110", dir: UP }) vs [MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111101111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111101111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111101111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111101111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "010", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111101111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0110", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "011111101111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111101111", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "011111101111", dir: DN })
+MidExact(MidExactSequence { mid: "01110", dir: UP }) vs [MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "010", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "010", dir: DN })
+MidExact(MidExactSequence { mid: "01110", dir: UP }) vs [MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0110", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "0110", dir: DN })
+MidExact(MidExactSequence { mid: "01110", dir: UP }) vs [MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111110111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "0111110111110", dir: DN })
+MidExact(MidExactSequence { mid: "01110", dir: UP }) vs [MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "01111101111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "01111101111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "01111101111110", dir: DN })
+MidExact(MidExactSequence { mid: "01110", dir: UP }) vs [MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111111110", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "01110", dir: UP }), MidExact(MidExactSequence { mid: "011110", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: UP })]
+all ok
+15 pcp: PCP { tiles: [Tile { up: "1111", dn: "10" }, Tile { up: "011", dn: "1" }, Tile { up: "1", dn: "1111" }] }
+visited: 15248
+lower true: "010"
+lower true: "10110111110"
+lower true: "10111110110"
+lower true: "10111110111"
+lower true: "0111110110111"
+lower true: "0111110111110"
+lower true: "01111101111111"
+visited: 15248
+MidExact(MidExactSequence { mid: "010", dir: DN }) vs [MidExact(MidExactSequence { mid: "10110111110", dir: DN }), MidExact(MidExactSequence { mid: "10111110110", dir: DN }), MidExact(MidExactSequence { mid: "10111110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111111", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "10110111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "010", dir: DN }), MidExact(MidExactSequence { mid: "10111110110", dir: DN }), MidExact(MidExactSequence { mid: "10111110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111111", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "10110111110", dir: DN })
+MidExact(MidExactSequence { mid: "010", dir: DN }) vs [MidExact(MidExactSequence { mid: "10111110110", dir: DN }), MidExact(MidExactSequence { mid: "10111110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111111", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "010", dir: DN })
+MidExact(MidExactSequence { mid: "10111110110", dir: DN }) vs [MidExact(MidExactSequence { mid: "10111110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111111", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "10111110110", dir: DN })
+MidExact(MidExactSequence { mid: "10111110111", dir: DN }) vs [MidExact(MidExactSequence { mid: "0111110110111", dir: DN }), MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111111", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "10111110111", dir: DN })
+MidExact(MidExactSequence { mid: "0111110110111", dir: DN }) vs [MidExact(MidExactSequence { mid: "0111110111110", dir: DN }), MidExact(MidExactSequence { mid: "01111101111111", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "0111110110111", dir: DN })
+MidExact(MidExactSequence { mid: "0111110111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "01111101111111", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "0111110111110", dir: DN })
+MidExact(MidExactSequence { mid: "01111101111111", dir: DN }) vs []
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "01111101111111", dir: DN })
+recursive strings: []
+all ok
+16 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "10", dn: "11" }, Tile { up: "1", dn: "1110" }] }
+visited: 16827
+upper true: "0"
+upper true: "1"
+lower true: "01110"
+lower true: "0111111110"
+visited: 16827
+MidExact(MidExactSequence { mid: "0", dir: UP }) vs [MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "0111111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1", dir: UP }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "0111111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "01110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0111111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0111111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "0111111110", dir: DN })]
+all ok
+17 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "10", dn: "11" }, Tile { up: "1", dn: "1011" }] }
+visited: 16927
+upper true: "010"
+upper true: "0110"
+visited: 16927
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "0110", dir: UP })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0110", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP })]
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: UP })]
+all ok
+18 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "10", dn: "11" }, Tile { up: "1", dn: "0111" }] }
+visited: 17070
+upper true: "010"
+upper true: "0110"
+visited: 17070
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "0110", dir: UP })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0110", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP })]
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: UP })]
+all ok
+19 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "00", dn: "11" }, Tile { up: "1", dn: "1100" }] }
+visited: 16827
+upper true: "0"
+upper true: "1"
+lower true: "0110"
+lower true: "011111110"
+visited: 16827
+MidExact(MidExactSequence { mid: "0", dir: UP }) vs [MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1", dir: UP }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "0110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+all ok
+20 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "1", dn: "1110" }, Tile { up: "0", dn: "1111" }] }
+visited: 15554
+upper true: "0"
+upper true: "1"
+lower true: "01110"
+lower true: "011111110"
+visited: 15554
+MidExact(MidExactSequence { mid: "0", dir: UP }) vs [MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1", dir: UP }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "01110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+all ok
+21 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "1", dn: "1110" }, Tile { up: "0", dn: "111" }] }
+visited: 16049
+upper true: "00"
+upper true: "010"
+lower true: "01110"
+lower true: "011111110"
+visited: 16049
+MidExact(MidExactSequence { mid: "00", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "01110", dir: DN }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "011111110", dir: DN }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "011111110", dir: DN })]
+all ok
+22 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "1", dn: "1110" }, Tile { up: "0", dn: "11" }] }
+visited: 16926
+upper true: "00"
+upper true: "010"
+upper true: "11111111111111"
+lower true: "01110"
+visited: 16926
+MidExact(MidExactSequence { mid: "00", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "11111111111111", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "11111111111111", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "11111111111111", dir: UP }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "11111111111111", dir: UP })
+MidExact(MidExactSequence { mid: "00", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "00", dir: UP })
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "010", dir: UP })
+MidExact(MidExactSequence { mid: "01110", dir: DN }) vs []
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "01110", dir: DN })]
+all ok
+23 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "1", dn: "1101" }, Tile { up: "0", dn: "11" }] }
+visited: 16875
+upper true: "00"
+upper true: "010"
+lower true: "01110"
+visited: 16875
+MidExact(MidExactSequence { mid: "00", dir: UP }) vs [MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "010", dir: UP }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "01110", dir: DN }) vs [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "00", dir: UP }), MidExact(MidExactSequence { mid: "010", dir: UP }), MidExact(MidExactSequence { mid: "01110", dir: DN })]
+all ok
+24 pcp: PCP { tiles: [Tile { up: "1111", dn: "1" }, Tile { up: "1", dn: "1100" }, Tile { up: "0", dn: "1111" }] }
+visited: 15426
+upper true: "0"
+upper true: "1"
+lower true: "0110"
+lower true: "01110"
+lower true: "0111111111110"
+visited: 15426
+MidExact(MidExactSequence { mid: "0", dir: UP }) vs [MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "0111111111110", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1", dir: UP }) vs [MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "01110", dir: DN }), MidExact(MidExactSequence { mid: "0111111111110", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout

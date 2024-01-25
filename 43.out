@@ -1,0 +1,224 @@
+43 pcp: PCP { tiles: [Tile { up: "1100", dn: "1" }, Tile { up: "1", dn: "001" }, Tile { up: "0", dn: "1001" }] }
+visited: 12083
+upper true: "000"
+upper true: "101"
+upper true: "1110011001110011"
+upper true: "1110011100110010"
+upper true: "11100111001100111"
+visited: 12083
+MidExact(MidExactSequence { mid: "000", dir: UP }) vs [MidExact(MidExactSequence { mid: "101", dir: UP }), MidExact(MidExactSequence { mid: "1110011001110011", dir: UP }), MidExact(MidExactSequence { mid: "1110011100110010", dir: UP }), MidExact(MidExactSequence { mid: "11100111001100111", dir: UP })]
+Timeout
+timeout
+theorem: MidExact(MidExactSequence { mid: "000", dir: UP })
+Result(true)
+MidExact(MidExactSequence { mid: "101", dir: UP }) vs [MidExact(MidExactSequence { mid: "000", dir: UP }), MidExact(MidExactSequence { mid: "1110011001110011", dir: UP }), MidExact(MidExactSequence { mid: "1110011100110010", dir: UP }), MidExact(MidExactSequence { mid: "11100111001100111", dir: UP })]
+Timeout
+timeout
+theorem: MidWild(MidWildSequence { front: "01", back: "", dir: UP })
+theorem: MidExact(MidExactSequence { mid: "101", dir: UP })
+Result(true)
+MidExact(MidExactSequence { mid: "1110011001110011", dir: UP }) vs [MidExact(MidExactSequence { mid: "000", dir: UP }), MidExact(MidExactSequence { mid: "101", dir: UP }), MidExact(MidExactSequence { mid: "1110011100110010", dir: UP }), MidExact(MidExactSequence { mid: "11100111001100111", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+theorem: MidWild(MidWildSequence { front: "110011", back: "11100110010", dir: UP })
+theorem: MidWild(MidWildSequence { front: "110011", back: "01100110010", dir: UP })
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1110011100110010", dir: UP }) vs [MidExact(MidExactSequence { mid: "000", dir: UP }), MidExact(MidExactSequence { mid: "101", dir: UP }), MidExact(MidExactSequence { mid: "1110011001110011", dir: UP }), MidExact(MidExactSequence { mid: "11100111001100111", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+theorem: MidWild(MidWildSequence { front: "0", back: "01100110011100110010", dir: UP })
+Result(true)
+MidExact(MidExactSequence { mid: "11100111001100111", dir: UP }) vs [MidExact(MidExactSequence { mid: "000", dir: UP }), MidExact(MidExactSequence { mid: "101", dir: UP }), MidExact(MidExactSequence { mid: "1110011001110011", dir: UP }), MidExact(MidExactSequence { mid: "1110011100110010", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+theorem: MidWild(MidWildSequence { front: "11", back: "01100110011100110010", dir: UP })
+Result(true)
+recursive strings: [MidExact(MidExactSequence { mid: "000", dir: UP }), MidExact(MidExactSequence { mid: "101", dir: UP }), MidExact(MidExactSequence { mid: "1110011001110011", dir: UP }), MidExact(MidExactSequence { mid: "1110011100110010", dir: UP }), MidExact(MidExactSequence { mid: "11100111001100111", dir: UP })]
+all ok
+44 pcp: PCP { tiles: [Tile { up: "1001", dn: "00" }, Tile { up: "00", dn: "1" }, Tile { up: "1", dn: "1001" }] }
+visited: 12992
+lower true: "0"
+lower true: "1"
+visited: 12992
+MidExact(MidExactSequence { mid: "0", dir: DN }) vs [MidExact(MidExactSequence { mid: "1", dir: DN })]
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1", dir: DN }) vs [MidExact(MidExactSequence { mid: "0", dir: DN })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+theorem: MidWild(MidWildSequence { front: "011", back: "", dir: UP })
+theorem: MidWild(MidWildSequence { front: "00011", back: "", dir: UP })
+theorem: MidWild(MidWildSequence { front: "010", back: "", dir: UP })
+theorem: MidWild(MidWildSequence { front: "00010", back: "", dir: UP })
+Result(false)
+failed: MidExact(MidExactSequence { mid: "1", dir: DN })
+MidExact(MidExactSequence { mid: "0", dir: DN }) vs []
+Result(false)
+failed: MidExact(MidExactSequence { mid: "0", dir: DN })
+recursive strings: []
+all ok
+45 pcp: PCP { tiles: [Tile { up: "1001", dn: "1" }, Tile { up: "10", dn: "0" }, Tile { up: "0", dn: "100" }] }
+visited: 12069
+upper true: "10101001101"
+upper true: "11010100101"
+upper true: "101010010000"
+upper true: "101010010010"
+upper true: "110100110101"
+upper true: "1100110101001"
+upper true: "11001101001101"
+upper true: "101001101001101"
+upper true: "101010010100100"
+upper true: "110100100110101"
+upper true: "1010010000100110"
+upper true: "1100110100100101"
+upper true: "1101010011001101"
+upper true: "00101001101010010"
+upper true: "01001001101001101"
+upper true: "10101001100110101"
+upper true: "11001101000010011"
+upper true: "11001101001001101"
+upper true: "11010010011010010"
+upper true: "001001001100110101"
+upper true: "010100110011010011"
+upper true: "011001001101001101"
+upper true: "101001101001001101"
+upper true: "101010010100110101"
+upper true: "101010011001101001"
+upper true: "110011010000100101"
+upper true: "0010010011010010010"
+upper true: "0101001001001101001"
+upper true: "0101001101010011001"
+upper true: "1010010010011010011"
+upper true: "1010011010100110011"
+upper true: "1010100101001101000"
+upper true: "1010100110011010000"
+upper true: "1100110010011001101"
+upper true: "1100110100110010011"
+upper true: "1101001100100110011"
+visited: 12069
+MidExact(MidExactSequence { mid: "10101001101", dir: UP }) vs [MidExact(MidExactSequence { mid: "11010100101", dir: UP }), MidExact(MidExactSequence { mid: "101010010000", dir: UP }), MidExact(MidExactSequence { mid: "101010010010", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(false)
+failed: MidExact(MidExactSequence { mid: "10101001101", dir: UP })
+MidExact(MidExactSequence { mid: "11010100101", dir: UP }) vs [MidExact(MidExactSequence { mid: "101010010000", dir: UP }), MidExact(MidExactSequence { mid: "101010010010", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "101010010000", dir: UP }) vs [MidExact(MidExactSequence { mid: "11010100101", dir: UP }), MidExact(MidExactSequence { mid: "101010010010", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "101010010010", dir: UP }) vs [MidExact(MidExactSequence { mid: "11010100101", dir: UP }), MidExact(MidExactSequence { mid: "101010010000", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Result(false)
+failed: MidExact(MidExactSequence { mid: "101010010010", dir: UP })
+MidExact(MidExactSequence { mid: "11010100101", dir: UP }) vs [MidExact(MidExactSequence { mid: "101010010000", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "101010010000", dir: UP }) vs [MidExact(MidExactSequence { mid: "11010100101", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "110100110101", dir: UP }) vs [MidExact(MidExactSequence { mid: "11010100101", dir: UP }), MidExact(MidExactSequence { mid: "101010010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "1100110101001", dir: UP }) vs [MidExact(MidExactSequence { mid: "11010100101", dir: UP }), MidExact(MidExactSequence { mid: "101010010000", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Result(true)
+MidExact(MidExactSequence { mid: "11001101001101", dir: UP }) vs [MidExact(MidExactSequence { mid: "11010100101", dir: UP }), MidExact(MidExactSequence { mid: "101010010000", dir: UP }), MidExact(MidExactSequence { mid: "110100110101", dir: UP }), MidExact(MidExactSequence { mid: "1100110101001", dir: UP }), MidExact(MidExactSequence { mid: "101001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100100", dir: UP }), MidExact(MidExactSequence { mid: "110100100110101", dir: UP }), MidExact(MidExactSequence { mid: "1010010000100110", dir: UP }), MidExact(MidExactSequence { mid: "1100110100100101", dir: UP }), MidExact(MidExactSequence { mid: "1101010011001101", dir: UP }), MidExact(MidExactSequence { mid: "00101001101010010", dir: UP }), MidExact(MidExactSequence { mid: "01001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "10101001100110101", dir: UP }), MidExact(MidExactSequence { mid: "11001101000010011", dir: UP }), MidExact(MidExactSequence { mid: "11001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "11010010011010010", dir: UP }), MidExact(MidExactSequence { mid: "001001001100110101", dir: UP }), MidExact(MidExactSequence { mid: "010100110011010011", dir: UP }), MidExact(MidExactSequence { mid: "011001001101001101", dir: UP }), MidExact(MidExactSequence { mid: "101001101001001101", dir: UP }), MidExact(MidExactSequence { mid: "101010010100110101", dir: UP }), MidExact(MidExactSequence { mid: "101010011001101001", dir: UP }), MidExact(MidExactSequence { mid: "110011010000100101", dir: UP }), MidExact(MidExactSequence { mid: "0010010011010010010", dir: UP }), MidExact(MidExactSequence { mid: "0101001001001101001", dir: UP }), MidExact(MidExactSequence { mid: "0101001101010011001", dir: UP }), MidExact(MidExactSequence { mid: "1010010010011010011", dir: UP }), MidExact(MidExactSequence { mid: "1010011010100110011", dir: UP }), MidExact(MidExactSequence { mid: "1010100101001101000", dir: UP }), MidExact(MidExactSequence { mid: "1010100110011010000", dir: UP }), MidExact(MidExactSequence { mid: "1100110010011001101", dir: UP }), MidExact(MidExactSequence { mid: "1100110100110010011", dir: UP }), MidExact(MidExactSequence { mid: "1101001100100110011", dir: UP })]
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
+Timeout
+timeout
