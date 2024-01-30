@@ -504,6 +504,11 @@ fn check_recursive(
                     assumptions.truncate(sofar_count);
                     return TimeoutResult::Result(true);
                 }
+                else {
+                    if lMidExact.len() > 0 {
+                        println!("empty lost {:?}", lMidExact);
+                    }
+                }
             }
         }
         assumptions.truncate(sofar_count);
