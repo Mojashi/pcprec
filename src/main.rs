@@ -855,7 +855,7 @@ fn apply_pdr_single(idx: usize, pcp: &PCP, raw: &str, rev: bool) {
 }
 
 fn apply_pdr() {
-    for (idx, (raw, pcp)) in parse_file("a.csv").into_iter().enumerate().skip(32) {
+    for (idx, (raw, pcp)) in parse_file("a.csv").into_iter().enumerate().skip(0) {
         let pcp = pcp;
         apply_pdr_single(idx, &pcp, &raw, true);
         apply_pdr_single(idx, &pcp, &raw, false);
