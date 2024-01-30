@@ -44,7 +44,6 @@ fn abstract_seq(seq: &PCPSequence, min_len: usize, max_len: usize) -> Vec<PCPSeq
             //     })).collect_vec()
             // ).collect_vec());
 
-            ret.push(seq.clone());
             ret
         }
         PCPSequence::MidWild(e) => {
@@ -70,16 +69,14 @@ fn abstract_seq(seq: &PCPSequence, min_len: usize, max_len: usize) -> Vec<PCPSeq
             //     back: e.back[(e.back.len() - min(e.back.len(), max_len))..].to_string(),
             //     dir: e.dir,
             // }));
-            ret.push(seq.clone());
             ret
             //vec![seq.clone()]
         }
         PCPSequence::MidExact(e) => {
-            let mut ret = substrings(&e.mid, min_len, max_len)
+            let ret = substrings(&e.mid, min_len, max_len)
                 .into_iter()
                 .map(|s| PCPSequence::MidExact(MidExactSequence { mid: s, dir: e.dir }))
                 .collect_vec();
-            ret.push(PCPSequence::MidExact(MidExactSequence { mid: e.mid[..min(e.mid.len(), max_len)].to_string(), dir: e.dir }));
             ret
         }
     }
@@ -339,40 +336,12 @@ fn check_recursive(
         return TimeoutResult::Result(true);
     }
 
-    let mut abstractions = abstract_seq(&cur, 0, 30)
-        .into_iter()
-        .filter(|s| -> bool {
-            !s.contains_empty()
-                && state.emptied.iter().all(|f| !s.contains(f))
-                && guarded.iter().all(|f| !f.contains(s))
-        })
-        .collect_vec();
-
-    //println!("abstractions: {:?}", abstractions.len());
-
-    if abstractions.len() > 2 {
-        abstractions = abstractions
-            .into_iter()
-            .filter(|s| -> bool {
-                let res = !check_reach_empty(state.pcp, s, &guarded, &mut state.emptied, 100);
-                if !res {
-                    state.emptied.push(s.clone());
-                }
-                res
-            })
-            .collect_vec();
-    }
-
-    if abstractions.len() == 0 {
-        //println!("empty abstraction");
-        return TimeoutResult::Result(true);
-    }
-    //println!("AFabstractions: {:?}", abstractions.len());
+    let mut abstractions = abstract_seq(&cur, 0, 30);
+    abstractions.push((*cur).clone());
 
     let mut non_abstracted_empty = false;
     for s in abstractions.iter() {
         let is_non_abstracted = s == cur;
-
         let next_all_exact = all_exact
             && match s {
                 PCPSequence::Exact(_) => true,
