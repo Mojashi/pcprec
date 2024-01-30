@@ -79,7 +79,7 @@ fn abstract_seq(seq: &PCPSequence, min_len: usize, max_len: usize) -> Vec<PCPSeq
                 .into_iter()
                 .map(|s| PCPSequence::MidExact(MidExactSequence { mid: s, dir: e.dir }))
                 .collect_vec();
-            ret.push(seq.clone());
+            ret.push(PCPSequence::MidExact(MidExactSequence { mid: e.mid[..min(e.mid.len(), max_len)].to_string(), dir: e.dir }));
             ret
         }
     }
@@ -523,6 +523,7 @@ fn check_recursive(
                     conclusions[sofar_count].extend(vec![s.clone()]);
                     conclusions[sofar_count].extend(l.clone());
                     if lMidExact.len() > 0 {
+                        println!("conclusionSizes: {:?}", conclusions.iter().take(20).map(|c| c.len()).collect_vec());
                         println!("level: {:?} brought: {:?}", sofar_count, lMidExact);
                     }
                     conclusions.truncate(sofar_count + 1);
