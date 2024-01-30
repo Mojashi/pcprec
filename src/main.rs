@@ -362,6 +362,11 @@ fn check_recursive(
             })
             .collect_vec();
     }
+
+    if abstractions.len() == 0 {
+        //println!("empty abstraction");
+        return TimeoutResult::Result(true);
+    }
     //println!("AFabstractions: {:?}", abstractions.len());
 
     let mut non_abstracted_empty = false;
