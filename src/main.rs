@@ -355,7 +355,7 @@ fn check_recursive(
                 && assumptions.iter().all(|f| !f.contains(s))
                 && conclusions.iter().flatten().all(|f| !f.contains(s))
         };
-        let mut nexts: Vec<PCPSequence> = s.apply_pcp(&state.pcp, new_is_ok);
+        let mut nexts: Vec<PCPSequence> = s.apply_pcp_avoid_midwild(&state.pcp, new_is_ok);
 
         refine_recursive_seqs(&mut nexts);
 
@@ -855,7 +855,7 @@ fn apply_pdr_single(idx: usize, pcp: &PCP, raw: &str, rev: bool) {
 }
 
 fn apply_pdr() {
-    for (idx, (raw, pcp)) in parse_file("a.csv").into_iter().enumerate().skip(0) {
+    for (idx, (raw, pcp)) in parse_file("a.csv").into_iter().enumerate().skip(32) {
         let pcp = pcp;
         apply_pdr_single(idx, &pcp, &raw, true);
         apply_pdr_single(idx, &pcp, &raw, false);

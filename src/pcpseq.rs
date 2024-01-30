@@ -1,3 +1,5 @@
+use std::{borrow::Borrow, collections::HashSet};
+
 use crate::pcp::{Tile, PCP};
 use itertools::Itertools;
 use regex::Regex;
@@ -217,7 +219,70 @@ impl PCPSequence {
         ret
     }
 
-    pub fn apply_pcp(&self, pcp: &PCP, is_ok: impl Fn(&PCPSequence)->bool) -> Vec<PCPSequence> {
+    pub fn apply_pcp_avoid_midwild(
+        &self,
+        pcp: &PCP,
+        is_ok: impl Fn(&PCPSequence) -> bool,
+    ) -> Vec<PCPSequence> {
+        let (mut wilds, mut non_wilds): (Vec<PCPSequence>, Vec<PCPSequence>) = self
+            .apply_pcp(pcp, |s| true)
+            .into_iter()
+            .map(|s| match s {
+                PCPSequence::MidWild(w) => {
+                    if w.front.len() == 0 {
+                        PCPSequence::MidExact(MidExactSequence {
+                            mid: w.back.clone(),
+                            dir: w.dir,
+                        })
+                    } else {
+                        PCPSequence::MidWild(w)
+                    }
+                },
+                _ => s,
+            })
+            .partition(|s| match s {
+                PCPSequence::MidWild(_) => true,
+                _ => false,
+            });
+        
+        let mut ret: HashSet<PCPSequence> = non_wilds
+            .into_iter()
+            .flat_map(|s| s.apply_pcp(pcp, &is_ok))
+            .collect();
+        let mut visitedWilds: HashSet<PCPSequence> = HashSet::new();
+        
+        
+        while wilds.len() > 0 {
+            visitedWilds.extend(wilds.clone());
+            let (nwilds, nnon_wilds): (Vec<PCPSequence>, Vec<PCPSequence>) = wilds
+                .into_iter()
+                .flat_map(|s| s.apply_pcp(pcp, |s| true))
+                .into_iter()
+                .map(|s| match s {
+                    PCPSequence::MidWild(w) => {
+                        if w.front.len() == 0 {
+                            PCPSequence::MidExact(MidExactSequence {
+                                mid: w.back.clone(),
+                                dir: w.dir,
+                            })
+                        } else {
+                            PCPSequence::MidWild(w)
+                        }
+                    },
+                    _ => s,
+                })
+                .partition(|s| match s {
+                    PCPSequence::MidWild(_) => true,
+                    _ => false,
+                });
+            wilds = nwilds.into_iter().filter(|s| !visitedWilds.contains(s)).collect_vec();
+            ret.extend(nnon_wilds);
+        }
+
+        return ret.into_iter().collect_vec();
+    }
+
+    pub fn apply_pcp(&self, pcp: &PCP, is_ok: impl Fn(&PCPSequence) -> bool) -> Vec<PCPSequence> {
         let ret = pcp
             .tiles
             .iter()
@@ -319,6 +384,7 @@ impl ExactSequence {
             .flat_map(|tile| self.apply_tile(tile))
             .collect_vec()
     }
+
     pub fn swap_dir(&self) -> ExactSequence {
         ExactSequence {
             seq: self.seq.clone(),
