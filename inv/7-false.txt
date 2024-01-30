@@ -1,0 +1,5 @@
+pcp: "PCP(Vector(Tile(1111,11), Tile(111,1110), Tile(0,111)))"
+pcp: PCP { tiles: [Tile { up: "1111", dn: "11" }, Tile { up: "111", dn: "1110" }, Tile { up: "0", dn: "111" }] }
+reversed: false
+result: false
+Result { assumptions: [MidExact(MidExactSequence { mid: "0", dir: UP }), MidWild(MidWildSequence { front: "", back: "111", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0", dir: UP }), MidExact(MidExactSequence { mid: "1", dir: UP }), MidWild(MidWildSequence { front: "", back: "0", dir: UP }), MidExact(MidExactSequence { mid: "0", dir: UP })], result: true, start: Exact(ExactSequence { seq: "11", dir: UP }) }

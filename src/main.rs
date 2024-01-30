@@ -4,19 +4,20 @@ mod pcpseq;
 use itertools::Itertools;
 use pcp::{parse_pcp_string, Tile, PCP};
 use pcpseq::{MidExactSequence, PCPSequence};
-use rand::seq::SliceRandom;
 use regex::Regex;
 
+use core::panic;
 use std::{
     cmp::min,
     collections::{BinaryHeap, HashSet, VecDeque},
     io::{BufRead, Write},
+    rc::Rc,
 };
 
 use crate::pcpseq::{ExactSequence, MidWildSequence, PCPDir};
 
-fn substrings(s: &str, max_len: usize) -> Vec<String> {
-    let mut ret: Vec<String> = (0..min(s.len(), max_len + 1))
+fn substrings(s: &str, min_len: usize, max_len: usize) -> Vec<String> {
+    let mut ret: Vec<String> = (min_len..min(s.len(), max_len + 1))
         .flat_map(|l| -> Vec<String> {
             (0..s.len() - l).map(|i| s[i..i + l].to_string()).collect()
         })
@@ -26,10 +27,11 @@ fn substrings(s: &str, max_len: usize) -> Vec<String> {
     ret
 }
 
-fn abstract_seq(seq: &PCPSequence, max_len: usize) -> Vec<PCPSequence> {
+fn abstract_seq(seq: &PCPSequence, min_len: usize, max_len: usize) -> Vec<PCPSequence> {
+    //return vec![seq.clone()];
     match seq {
         PCPSequence::Exact(e) => {
-            let mut ret = substrings(&e.seq, max_len)
+            let mut ret = substrings(&e.seq, min_len, max_len)
                 .into_iter()
                 .map(|s| PCPSequence::MidExact(MidExactSequence { mid: s, dir: e.dir }))
                 .collect_vec();
@@ -73,7 +75,7 @@ fn abstract_seq(seq: &PCPSequence, max_len: usize) -> Vec<PCPSequence> {
             //vec![seq.clone()]
         }
         PCPSequence::MidExact(e) => {
-            let mut ret = substrings(&e.mid, max_len)
+            let mut ret = substrings(&e.mid, min_len, max_len)
                 .into_iter()
                 .map(|s| PCPSequence::MidExact(MidExactSequence { mid: s, dir: e.dir }))
                 .collect_vec();
@@ -98,10 +100,104 @@ impl TimeoutResult {
     }
 }
 
+fn enumerate_suffices(s: &str) -> Vec<String> {
+    let mut ret = vec![];
+    for i in 0..s.len() {
+        ret.push(s[i..].to_string());
+    }
+    ret
+}
+fn enumerate_prefices(s: &str) -> Vec<String> {
+    let mut ret = vec![];
+    for i in 0..s.len() {
+        ret.push(s[..i].to_string());
+    }
+    ret
+}
+fn pcp_isok(pcp: &PCP) -> impl Fn(&PCPSequence) -> bool {
+    let upper_suffices = pcp
+        .tiles
+        .iter()
+        .flat_map(|t| enumerate_suffices(&t.up))
+        .collect_vec();
+    let upper_prefices = pcp
+        .tiles
+        .iter()
+        .flat_map(|t| enumerate_prefices(&t.up))
+        .collect_vec();
+    let lower_suffices = pcp
+        .tiles
+        .iter()
+        .flat_map(|t| enumerate_suffices(&t.dn))
+        .collect_vec();
+    let lower_prefices = pcp
+        .tiles
+        .iter()
+        .flat_map(|t| enumerate_prefices(&t.dn))
+        .collect_vec();
+    let upper_substr_regex = Regex::new(
+        format!(
+            "^({})?({})*({})?$",
+            upper_suffices.iter().join("|"),
+            pcp.tiles.iter().map(|t| t.up.clone()).join("|"),
+            upper_prefices.iter().join("|"),
+        )
+        .as_str(),
+    )
+    .unwrap();
+    let lower_substr_regex = Regex::new(
+        format!(
+            "^({})?({})*({})?$",
+            lower_suffices.iter().join("|"),
+            pcp.tiles.iter().map(|t| t.dn.clone()).join("|"),
+            lower_prefices.iter().join("|"),
+        )
+        .as_str(),
+    )
+    .unwrap();
+
+    let upper_suffix_regex = Regex::new(
+        format!(
+            "^({})?({})*$",
+            upper_suffices.iter().join("|"),
+            pcp.tiles.iter().map(|t| t.up.clone()).join("|"),
+        )
+        .as_str(),
+    )
+    .unwrap();
+    let lower_suffix_regex = Regex::new(
+        format!(
+            "^({})?({})*$",
+            lower_suffices.iter().join("|"),
+            pcp.tiles.iter().map(|t| t.dn.clone()).join("|"),
+        )
+        .as_str(),
+    )
+    .unwrap();
+
+    let isok = move |s: &PCPSequence| -> bool {
+        match s {
+            PCPSequence::Exact(e) => {
+                lower_suffix_regex.is_match(&e.seq) && upper_suffix_regex.is_match(&e.seq)
+            }
+            PCPSequence::MidExact(e) => {
+                upper_substr_regex.is_match(&e.mid) && lower_substr_regex.is_match(&e.mid)
+            }
+            PCPSequence::MidWild(e) => {
+                upper_substr_regex.is_match(&e.front)
+                    && lower_substr_regex.is_match(&e.front)
+                    && upper_suffix_regex.is_match(&e.back)
+                    && lower_suffix_regex.is_match(&e.back)
+            }
+        }
+    };
+    Box::new(isok)
+}
+
 fn check_reach_empty(
     pcp: &PCP,
     s: &PCPSequence,
-    assumptions: &mut Vec<PCPSequence>,
+    assumptions: &Vec<&PCPSequence>,
     emptied: &Vec<PCPSequence>,
     max_iter: u32,
 ) -> bool {
@@ -110,28 +206,29 @@ fn check_reach_empty(
     q.push((-(s.num_chars() as i32), s.clone()));
 
     let mut visited: HashSet<PCPSequence> = HashSet::new();
-    visited.extend(assumptions.iter().cloned());
 
     while (visited.len() as u32) < max_iter && q.len() > 0 {
         let (_, seq) = q.pop().unwrap();
         if seq.contains_empty() {
             return true;
         }
-        if visited.contains(&seq) {
+        if visited.iter().any(|f| f.contains(&seq)) || assumptions.iter().any(|f| f.contains(&seq))
+        {
             continue;
         }
         if emptied.iter().any(|f| seq.contains(f)) {
             return true;
         }
-        visited.insert(seq.clone());
 
-        let next = seq.apply_pcp(pcp);
+        let next = seq.apply_pcp(pcp, |s| true);
+        visited.insert(seq);
 
         for n in next.iter() {
             if n.contains_empty() {
                 return true;
             }
-            if visited.contains(&n) {
+            if visited.iter().any(|f| f.contains(&n)) || assumptions.iter().any(|f| f.contains(&n))
+            {
                 continue;
             }
             if emptied.iter().any(|f| n.contains(f)) {
@@ -174,7 +271,7 @@ fn enumerate_configurations(pcp: &PCP) -> Vec<ExactSequence> {
 }
 
 fn enumerate_empty_configs(pcp: &PCP) -> Vec<PCPSequence> {
-    let ret = enumerate_configurations(&pcp.swap_pcp().reverse_pcp())
+    let mut ret = enumerate_configurations(&pcp.swap_pcp().reverse_pcp())
         .iter()
         .map(|s| {
             PCPSequence::Exact(ExactSequence {
@@ -183,24 +280,22 @@ fn enumerate_empty_configs(pcp: &PCP) -> Vec<PCPSequence> {
             })
         })
         .collect_vec();
+    ret.sort_by_key(|s| s.num_chars());
     ret
 }
 
 struct AbstractDFSState<'a> {
     pcp: &'a PCP,
-    bad_theorems: Box<HashSet<PCPSequence>>,
-    theorems: Box<Vec<PCPSequence>>,
+    is_ok: Rc<dyn Fn(&PCPSequence) -> bool>,
     emptied: Box<Vec<PCPSequence>>,
-    failed_theorems: Box<Vec<PCPSequence>>,
 }
 impl AbstractDFSState<'_> {
     fn new<'a>(pcp: &'a PCP) -> AbstractDFSState<'a> {
+        let is_ok = pcp_isok(pcp);
         AbstractDFSState {
             pcp: pcp,
-            bad_theorems: Box::new(HashSet::new()),
-            theorems: Box::new(vec![]),
+            is_ok: Rc::new(is_ok),
             emptied: Box::new(enumerate_empty_configs(pcp)),
-            failed_theorems: Box::new(vec![]),
         }
     }
 }
@@ -208,6 +303,8 @@ impl AbstractDFSState<'_> {
 fn check_recursive(
     cur: &PCPSequence,
     assumptions: &mut Vec<PCPSequence>,
+    // conclusions[0] is theorem
+    conclusions: &mut Vec<Vec<PCPSequence>>,
     depthlimit: u64,
     theorem_checking: bool,
     all_exact: bool,
@@ -219,6 +316,10 @@ fn check_recursive(
         }
         return TimeoutResult::Result(false);
     }
+    let guarded = assumptions
+        .iter()
+        .chain(conclusions.iter().flatten())
+        .collect_vec();
     // if all_exact {
     //     println!("all exact {:?}", depthlimit);
     // }
@@ -233,26 +334,35 @@ fn check_recursive(
     //println!("cur: {:?}", cur, );
     //println!("{:?}", assumptions.len());
 
-    if assumptions
-        .iter()
-        .chain(state.theorems.iter())
-        .any(|s| -> bool { s.contains(cur) })
-    {
+    if guarded.iter().any(|s| -> bool { s.contains(cur) }) {
         //println!("assumption hit!");
         return TimeoutResult::Result(true);
     }
 
-    let abstractions = abstract_seq(&cur, 10)
+    let mut abstractions = abstract_seq(&cur, 0, 30)
         .into_iter()
         .filter(|s| -> bool {
             !s.contains_empty()
                 && state.emptied.iter().all(|f| !s.contains(f))
-                && assumptions
-                    .iter()
-                    .chain(state.theorems.iter())
-                    .all(|f| !f.contains(s))
+                && guarded.iter().all(|f| !f.contains(s))
         })
         .collect_vec();
+
+    //println!("abstractions: {:?}", abstractions.len());
+
+    if abstractions.len() > 2 {
+        abstractions = abstractions
+            .into_iter()
+            .filter(|s| -> bool {
+                let res = !check_reach_empty(state.pcp, s, &guarded, &mut state.emptied, 100);
+                if !res {
+                    state.emptied.push(s.clone());
+                }
+                res
+            })
+            .collect_vec();
+    }
+    //println!("AFabstractions: {:?}", abstractions.len());
 
     let mut non_abstracted_empty = false;
     for s in abstractions.iter() {
@@ -266,141 +376,163 @@ fn check_recursive(
         assert!(s.contains(cur));
         let sofar_count = assumptions.len();
 
-        let mut nexts: Vec<PCPSequence> = s.apply_pcp(&state.pcp);
+        let new_is_ok = |s: &PCPSequence| {
+            (state.is_ok)(s)
+                && assumptions.iter().all(|f| !f.contains(s))
+                && conclusions.iter().flatten().all(|f| !f.contains(s))
+        };
+        let mut nexts: Vec<PCPSequence> = s.apply_pcp(&state.pcp, new_is_ok);
+
         refine_recursive_seqs(&mut nexts);
-        nexts.shuffle(&mut rand::thread_rng());
+
+        nexts.sort_by_key(|s| s.num_chars());
         assumptions.push(s.clone());
         log::debug!("nexts: {:?}", nexts);
-        let ress = nexts
+
+        let mut nexts_all_ok: TimeoutResult = TimeoutResult::Result(true);
+        for nex in nexts.iter() {
+            let nex_res = check_recursive(
+                nex,
+                assumptions,
+                conclusions,
+                depthlimit - 1,
+                theorem_checking,
+                next_all_exact,
+                state,
+            );
+
+            match nex_res {
+                TimeoutResult::Timeout => {
+                    nexts_all_ok = TimeoutResult::Timeout;
+                    break;
+                }
+                TimeoutResult::Result(r) => {
+                    if !r {
+                        state.emptied.push(s.clone());
+                        if is_non_abstracted {
+                            non_abstracted_empty = true;
+                        }
+                        nexts_all_ok = TimeoutResult::Result(false);
+                        break;
+                    } else {
+                        match s {
+                            PCPSequence::Exact(_) => {}
+                            PCPSequence::MidWild(_) => {}
+                            _ => {
+                                // if !thorem_checking && !state.bad_theorems.contains(s) && sofar_count > 0 {
+                                //     let reuse_assumptions = sofar_count / 4;
+                                //     println!("theorem checking {:?}", s);
+                                //     let mut tmp_assumptions: Vec<PCPSequence> = vec![];
+                                //     let mut new_state = AbstractDFSState {
+                                //         pcp: state.pcp,
+                                //         is_ok: state.is_ok.clone(),
+                                //         theorems: state.theorems.clone(),
+                                //         bad_theorems: state.bad_theorems.clone(),
+                                //         emptied: state.emptied.clone(),
+                                //     };
+                                //     tmp_assumptions.extend(assumptions[..reuse_assumptions].to_vec());
+
+                                //     new_state.bad_theorems.insert(s.clone());
+                                //     let is_theorem = check_recursive(
+                                //         s,
+                                //         &mut tmp_assumptions,
+                                //         20,
+                                //         true,
+                                //         false,
+                                //         &mut new_state,
+                                //     );
+                                //     new_state.bad_theorems.remove(s);
+                                //     if is_theorem.succeeded() {
+                                //         if reuse_assumptions == 0{
+                                //             println!("theorem: {:?}", s);
+                                //             state.theorems.push(s.clone());
+                                //         } else {
+                                //             println!("gradeup: {:?} {:?} {:?}", s, assumptions.len(), reuse_assumptions);
+                                //         }
+                                //         //state.theorems.extend(tmp_assumptions);
+
+                                //         assumptions.extend(tmp_assumptions.iter().skip(reuse_assumptions).cloned() );
+                                //         //state.theorems.push(s.clone());
+                                //     } else {
+                                //         state.bad_theorems.insert(s.clone());
+                                //     }
+
+                                //     match is_theorem {
+                                //         TimeoutResult::Timeout => {
+                                //             println!("timeout theorem: {:?}", s);
+                                //         }
+                                //         TimeoutResult::Result(r) => {
+                                //             if !r {
+                                //                 // some assumption is wrong
+                                //                 //return TimeoutResult::Timeout;
+                                //             }
+                                //         }
+                                //         _=>{}
+                                //     }
+                                // }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        while conclusions.len() <= sofar_count + 1 {
+            conclusions.push(vec![]);
+        }
+        let l = conclusions[sofar_count + 1].clone();
+        let lMidExact: Vec<&PCPSequence> = l
             .iter()
-            .map(|nex| {
-                check_recursive(
-                    nex,
-                    assumptions,
-                    depthlimit - 1,
-                    theorem_checking,
-                    next_all_exact,
-                    state,
-                )
+            .filter(|s| match s {
+                PCPSequence::MidExact(_) => true,
+                _ => false,
             })
             .collect_vec();
-
-        let has_empty = ress.iter().any(|r| match r {
-            TimeoutResult::Timeout => false,
-            TimeoutResult::Result(r) => *r == false,
-        });
-
-        if has_empty {
-            state.emptied.append(
-                &mut s
-                    .sample()
-                    .iter()
-                    .take(10)
-                    .map(|a| {
-                        PCPSequence::Exact(ExactSequence {
-                            seq: a.clone(),
-                            dir: s.dir(),
-                        })
-                    })
-                    .collect_vec(),
-            );
-            if is_non_abstracted {
-                non_abstracted_empty = true;
-            }
-        }
-
-        let res = ress.iter().all(|r| r.succeeded());
-        if !res && !has_empty && depthlimit > 10 {
-            // timeout
-            match s {
-                PCPSequence::Exact(_) => {}
-                PCPSequence::MidExact(e) => {
-                    //println!("promising {:?}", s);
-                    if !theorem_checking && !state.bad_theorems.contains(s) && e.mid.len() <= 15 {
-                        let mut tmp_assumptions: Vec<PCPSequence> = vec![];
-                        let mut new_state = AbstractDFSState {
-                            pcp: state.pcp,
-                            theorems: state.theorems.clone(),
-                            bad_theorems: state.bad_theorems.clone(),
-                            emptied: state.emptied.clone(),
-                            failed_theorems: state.failed_theorems.clone(),
-                        };
-                        let is_theorem = check_recursive(
-                            s,
-                            &mut tmp_assumptions,
-                            40,
-                            true,
-                            false,
-                            &mut new_state,
-                        );
-                        if is_theorem.succeeded() {
-                            println!("theorem: {:?}", s);
-                            state.theorems.extend(tmp_assumptions);
-                            state.theorems.push(s.clone());
-                        } else {
-                            state.bad_theorems.insert(s.clone());
+        match nexts_all_ok {
+            TimeoutResult::Timeout => {
+                if lMidExact.len() > 0 {
+                    println!("lost {:?}", lMidExact);
+                    for s in lMidExact.iter() {
+                        if check_reach_empty(state.pcp, s, &vec![], &state.emptied, 10000) {
+                            println!("lost reachable {:?}", s);
+                            state.emptied.push((*s).clone());
                         }
-                    }
-                }
-                _ => {}
-            }
-        }
-        if res {
-            match s {
-                PCPSequence::Exact(_) => {}
-                _ => {
-                    if !theorem_checking && !state.bad_theorems.contains(s) {
-                        let mut tmp_assumptions: Vec<PCPSequence> = vec![];
-                        let mut new_state = AbstractDFSState {
-                            pcp: state.pcp,
-                            theorems: state.theorems.clone(),
-                            bad_theorems: state.bad_theorems.clone(),
-                            emptied: state.emptied.clone(),
-                            failed_theorems: state.failed_theorems.clone(),
-                        };
-                        assumptions.truncate(sofar_count);
-                        let is_theorem = check_recursive(
-                            s,
-                            &mut tmp_assumptions,
-                            20,
-                            true,
-                            false,
-                            &mut new_state,
-                        );
-                        if is_theorem.succeeded() {
-                            println!("theorem: {:?}", s);
-                            state.theorems.extend(tmp_assumptions);
-                            state.theorems.push(s.clone());
-                        } else {
-                            state.bad_theorems.insert(s.clone());
+                        else {
+                            println!("lost unreachable {:?}", s);
+                            // let mut newAss = assumptions.iter().take(sofar_count).map(|s| s.clone()).collect_vec();
+                            // let mut newConc = conclusions.iter().take(sofar_count + 1).map(|s| s.clone()).collect_vec();
+                            // let rr = check_recursive(
+                            //     s,
+                            //     &mut newAss,
+                            //     &mut newConc,
+                            //     depthlimit * 2,
+                            //     false,
+                            //     false,
+                            //     state,
+                            // );
+                            // println!("lost unreachable repo {:?} {:?}", s, rr);
+                            // if rr.succeeded() {
+                            //     state.emptied.push((*s).clone());
+                            // }
                         }
                     }
                 }
             }
-            return TimeoutResult::Result(true);
-        }
-
-        assert!(assumptions.len() >= sofar_count);
-
-        assumptions.remove(sofar_count);
-        loop {
-            let mut removed = false;
-            for i in (sofar_count..assumptions.len()).rev() {
-                let inexts = assumptions[i].apply_pcp(&state.pcp);
-                if !inexts
-                    .into_iter()
-                    .all(|n| assumptions.iter().any(|s| s.contains(&n)))
-                {
-                    removed = true;
-                    assumptions.remove(i);
+            TimeoutResult::Result(r) => {
+                if r {
+                    conclusions[sofar_count].extend(vec![s.clone()]);
+                    conclusions[sofar_count].extend(l.clone());
+                    if lMidExact.len() > 0 {
+                        println!("level: {:?} brought: {:?}", sofar_count, lMidExact);
+                    }
+                    conclusions.truncate(sofar_count + 1);
+                    assumptions.truncate(sofar_count);
+                    return TimeoutResult::Result(true);
                 }
             }
-            if !removed {
-                break;
-            }
         }
-        //assumptions.truncate(sofar_count);
-        //println!("sofar: {sofar_count} assumptions: {:?}", assumptions.len());
+        assumptions.truncate(sofar_count);
+        conclusions.truncate(sofar_count + 1);
     }
 
     if non_abstracted_empty {
@@ -428,42 +560,51 @@ fn pdr_like(pcp: &PCP) -> (bool, Vec<Result>) {
 
     let mut state = AbstractDFSState::new(pcp);
 
-    let results = firsts
-        .iter()
-        .map(|s| -> Result {
-            for max_depth_log in 1..5 {
-                let max_depth = 1 << max_depth_log;
-                println!("max_depth: {:?}", max_depth);
-                let mut assumptions = vec![];
-                let r = check_recursive(
-                    &PCPSequence::Exact(s.clone()),
-                    &mut assumptions,
-                    max_depth,
-                    false,
-                    true,
-                    &mut state,
-                );
-                println!("start: {:?} result: {:?}", s.seq, r.succeeded());
-                state.theorems.append(&mut assumptions);
-                if r.succeeded() {
-                    return Result {
-                        assumptions: *state.theorems.clone(),
-                        result: r.succeeded(),
-                        start: PCPSequence::Exact(s.clone()),
-                    };
+    let mut results = vec![];
+    let mut theorems = vec![];
+    for s in firsts {
+        let mut has_ok = false;
+        for max_depth_log in 20..40 {
+            let max_depth = 1 << max_depth_log;
+            println!("max_depth: {:?}", max_depth);
+            let mut assumptions = vec![];
+            let mut conclusions = vec![];
+            let r = check_recursive(
+                &PCPSequence::Exact(s.clone()),
+                &mut assumptions,
+                &mut conclusions,
+                max_depth,
+                false,
+                true,
+                &mut state,
+            );
+            println!("start: {:?} result: {:?}", s.seq, r.succeeded());
+            theorems.extend(conclusions.into_iter().flatten());
+            if r.succeeded() {
+                results.push(Result {
+                    assumptions: theorems.clone(),
+                    result: r.succeeded(),
+                    start: PCPSequence::Exact(s.clone()),
+                });
+                has_ok = true;
+                break;
+            }
+            match r {
+                TimeoutResult::Timeout => {
+                    println!("timeout");
+                }
+                TimeoutResult::Result(r) => {
+                    if !r {
+                        panic!("failed");
+                    }
                 }
             }
-            Result {
-                assumptions: *state.theorems.clone(),
-                result: false,
-                start: PCPSequence::Exact(s.clone()),
-            }
-        })
-        .collect_vec();
-
-    let res = results.iter().all(|s| -> bool { s.result });
-    println!("final result: {res} {:?}", pcp);
-    (res, results)
+        }
+        if !has_ok {
+            return (false, results);
+        }
+    }
+    (true, results)
 }
 
 fn enumerate_substrings_from_pcp(pcp: &PCP, max_len: usize) -> (Vec<String>, Vec<String>) {
@@ -474,7 +615,7 @@ fn enumerate_substrings_from_pcp(pcp: &PCP, max_len: usize) -> (Vec<String>, Vec
     });
     let mut visited = vec![];
 
-    for _ in 0..1000 {
+    for _ in 0..100000 {
         let seq = q.pop_front().unwrap();
         let next = seq.apply_pcp(pcp);
         for n in next {
@@ -494,9 +635,9 @@ fn enumerate_substrings_from_pcp(pcp: &PCP, max_len: usize) -> (Vec<String>, Vec
 
     for s in visited {
         if s.dir == PCPDir::UP {
-            upper_substrs.append(&mut substrings(&s.seq, max_len));
+            upper_substrs.append(&mut substrings(&s.seq, 0, max_len));
         } else {
-            lower_substrs.append(&mut substrings(&s.seq, max_len));
+            lower_substrs.append(&mut substrings(&s.seq, 0, max_len));
         }
     }
 
@@ -521,7 +662,7 @@ fn parse_file(f: &str) -> Vec<(String, PCP)> {
 }
 
 fn find_nonempty_substrs(pcp: &PCP) -> (Vec<String>, Vec<String>) {
-    let substr_len = 20;
+    let substr_len = 25;
     let (upper_substrs, lower_substrs) = enumerate_substrings_from_pcp(&pcp, substr_len);
     let mut upper_trues: Vec<String> = vec![];
 
@@ -543,7 +684,7 @@ fn find_nonempty_substrs(pcp: &PCP) -> (Vec<String>, Vec<String>) {
             }),
             &mut vec![],
             &emptied,
-            10000,
+            1000000,
         );
         if !result {
             println!("upper true: {:?}", s);
@@ -568,7 +709,7 @@ fn find_nonempty_substrs(pcp: &PCP) -> (Vec<String>, Vec<String>) {
             }),
             &mut vec![],
             &emptied,
-            10000,
+            100000,
         );
         if !result {
             println!("lower true: {:?}", s);
@@ -734,10 +875,10 @@ fn apply_pdr_single(idx: usize, pcp: &PCP, raw: &str, rev: bool) {
 }
 
 fn apply_pdr() {
-    for (idx, (raw, pcp)) in parse_file("a.csv").into_iter().enumerate().skip(2) {
+    for (idx, (raw, pcp)) in parse_file("a.csv").into_iter().enumerate().skip(0) {
         let pcp = pcp;
-        apply_pdr_single(idx, &pcp, &raw, false);
         apply_pdr_single(idx, &pcp, &raw, true);
+        apply_pdr_single(idx, &pcp, &raw, false);
     }
 }
 
@@ -817,8 +958,10 @@ fn check_valid_proof(pcp: &PCP, result: &Result) -> bool {
     {
         return false;
     }
+    let is_ok = pcp_isok(pcp);
     for p in result.assumptions.iter() {
-        let nexts = p.apply_pcp(pcp);
+        let nexts = p.apply_pcp(pcp, Box::new(&is_ok));
+
         for n in nexts {
             if result
                 .assumptions
@@ -936,11 +1079,14 @@ fn main() {
     // let lorents = parse_pcp_string("PCP(Vector(Tile(10,0), Tile(0,001), Tile(001,1)))");
     // apply_pdr_single(123, &lorents, "PCP(Vector(Tile(10, 0), Tile(0, 001), Tile(001, 1)))", false);
     //apply_pdr_single(21, &pcps[21].1, &pcps[21].0, false);
-    //apply_pdr();
 
-    for (idx, (raw, pcp)) in pcps.iter().enumerate().skip(45) {
+    apply_pdr();
+
+    for (idx, (raw, pcp)) in pcps.iter().enumerate().skip(1) {
+        let pcp = &pcp.reverse_pcp().swap_pcp();
         println!("{idx} pcp: {:?}", pcp);
         let (us, ds) = find_nonempty_substrs(&pcp);
+
         let mut ss = us
             .iter()
             .map(|s| {
@@ -949,7 +1095,7 @@ fn main() {
                     dir: PCPDir::UP,
                 })
             })
-            .chain(ds.iter().map(|s| {
+            .chain(ds.iter().map(|s: &String| {
                 PCPSequence::MidExact(MidExactSequence {
                     mid: s.clone(),
                     dir: PCPDir::DN,
@@ -964,10 +1110,9 @@ fn main() {
         //     .apply_pcp(&pcp);
         // ss.extend(firsts.iter().map(|s| PCPSequence::Exact(s.clone())));
 
-        let mut state = AbstractDFSState::new(&pcp);
-
         loop {
             let mut allok = true;
+            let mut ret_theorems: Vec<PCPSequence> = vec![];
             for (idx, s) in ss.iter().enumerate() {
                 let mut others = vec![];
                 for (i, o) in ss.iter().enumerate() {
@@ -975,14 +1120,28 @@ fn main() {
                         others.push(o.clone());
                     }
                 }
+                let mut state = AbstractDFSState::new(&pcp);
+                let mut conclusions = vec![others.clone()];
                 println!("{:?} vs {:?}", s, others);
                 for max_depth_log in 0..10 {
                     let max_depth = 1 << max_depth_log;
-                    let res = check_recursive(&s, &mut others, max_depth, false, false, &mut state);
+                    let res = check_recursive(
+                        &s,
+                        &mut vec![],
+                        &mut conclusions,
+                        max_depth,
+                        false,
+                        false,
+                        &mut state,
+                    );
                     println!("{:?}", res);
                     match res {
                         TimeoutResult::Timeout => {
                             println!("timeout");
+                            if max_depth_log == 6 {
+                                allok = false;
+                                break;
+                            }
                             continue;
                         }
                         TimeoutResult::Result(r) => {
@@ -997,12 +1156,16 @@ fn main() {
                 }
                 if !allok {
                     println!("failed: {:?}", s);
-                    state.emptied.push(s.clone());
                     ss.remove(idx);
                     break;
                 }
+                ret_theorems.extend(conclusions.iter().flatten().cloned());
             }
             if allok {
+                // write ret_theorems to file
+                let mut file =
+                    std::fs::File::create("theorems/".to_string() + &idx.to_string() + ".txt");
+
                 println!("recursive strings: {:?}", ss);
                 println!("all ok");
                 break;

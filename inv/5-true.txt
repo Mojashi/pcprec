@@ -1,0 +1,5 @@
+pcp: "PCP(Vector(Tile(1111,101), Tile(1101,1), Tile(1,1111)))"
+pcp: PCP { tiles: [Tile { up: "101", dn: "1111" }, Tile { up: "1", dn: "1011" }, Tile { up: "1111", dn: "1" }] }
+reversed: true
+result: false
+Result { assumptions: [Exact(ExactSequence { seq: "011", dir: DN })], result: true, start: Exact(ExactSequence { seq: "011", dir: DN }) }

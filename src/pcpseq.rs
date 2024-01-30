@@ -1,5 +1,6 @@
 use crate::pcp::{Tile, PCP};
 use itertools::Itertools;
+use regex::Regex;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub enum PCPDir {
@@ -95,25 +96,38 @@ impl MidExactSequence {
 
 #[test]
 fn contain_test() {
-    let a = PCPSequence::MidExact(MidExactSequence { mid: "0110".to_owned(), dir: PCPDir::DN });
-    let b = PCPSequence::MidWild(MidWildSequence { front: "".to_owned(), back: "11101101".to_owned(), dir: PCPDir::DN });
+    let a = PCPSequence::MidExact(MidExactSequence {
+        mid: "0110".to_owned(),
+        dir: PCPDir::DN,
+    });
+    let b = PCPSequence::MidWild(MidWildSequence {
+        front: "".to_owned(),
+        back: "11101101".to_owned(),
+        dir: PCPDir::DN,
+    });
     assert!(a.contains(&b));
 }
 
 #[test]
 fn exact_seq_test() {
-    let s = PCPSequence::Exact(ExactSequence{
+    let s = PCPSequence::Exact(ExactSequence {
         seq: "110".to_string(),
         dir: PCPDir::DN,
     });
-    let tile = Tile { up: "1101".to_string(), dn: "110".to_string() };
-    let nexts = s.apply_tile(&tile);
-    
+    let tile = Tile {
+        up: "1101".to_string(),
+        dn: "110".to_string(),
+    };
+    let nexts = s.apply_tile(&tile, &|s| true);
+
     assert_eq!(nexts.len(), 1);
-    assert_eq!(nexts[0], PCPSequence::Exact(ExactSequence{
-        seq: "10".to_string(),
-        dir: PCPDir::DN,
-    }));
+    assert_eq!(
+        nexts[0],
+        PCPSequence::Exact(ExactSequence {
+            seq: "10".to_string(),
+            dir: PCPDir::DN,
+        })
+    );
 }
 
 impl MidWildSequence {
@@ -203,10 +217,11 @@ impl PCPSequence {
         ret
     }
 
-    pub fn apply_pcp(&self, pcp: &PCP) -> Vec<PCPSequence> {
-        let ret = pcp.tiles
+    pub fn apply_pcp(&self, pcp: &PCP, is_ok: impl Fn(&PCPSequence)->bool) -> Vec<PCPSequence> {
+        let ret = pcp
+            .tiles
             .iter()
-            .flat_map(|tile| self.apply_tile(tile))
+            .flat_map(|tile| self.apply_tile(tile, &is_ok))
             .sorted()
             .dedup()
             .collect_vec();
@@ -228,15 +243,15 @@ impl PCPSequence {
         ret
     }
 
-    fn apply_tile(&self, tile: &Tile) -> Vec<PCPSequence> {
+    fn apply_tile(&self, tile: &Tile, is_ok: &impl Fn(&PCPSequence) -> bool) -> Vec<PCPSequence> {
         let ret = match self {
-            PCPSequence::MidWild(seq) => seq.apply_tile(tile),
+            PCPSequence::MidWild(seq) => seq.apply_tile(tile, is_ok),
             PCPSequence::Exact(seq) => seq
                 .apply_tile(tile)
                 .into_iter()
                 .map(|f| PCPSequence::Exact(f))
                 .collect_vec(),
-            PCPSequence::MidExact(seq) => seq.apply_tile(tile),
+            PCPSequence::MidExact(seq) => seq.apply_tile(tile, is_ok),
         };
 
         // match self {
@@ -341,21 +356,29 @@ impl ExactSequence {
     }
 }
 
-
 #[test]
 fn midwild_apply_test() {
-    let s = PCPSequence::MidWild(MidWildSequence { front: "11".to_string(), back: "011011".to_string(), dir: PCPDir::UP });
+    let s = PCPSequence::MidWild(MidWildSequence {
+        front: "11".to_string(),
+        back: "011011".to_string(),
+        dir: PCPDir::UP,
+    });
+}
+
+pub struct ConfAutomaton {
+    pub up: Regex,
+    pub dir: Regex,
 }
 
 impl MidWildSequence {
-    fn apply_tile(&self, tile: &Tile) -> Vec<PCPSequence> {
+    fn apply_tile(&self, tile: &Tile, is_ok: &impl Fn(&PCPSequence) -> bool) -> Vec<PCPSequence> {
         if self.dir == PCPDir::DN {
             return MidWildSequence {
                 front: self.front.clone(),
                 back: self.back.clone(),
                 dir: self.dir.opposite(),
             }
-            .apply_tile(&tile.swap_tile())
+            .apply_tile(&tile.swap_tile(), is_ok)
             .into_iter()
             .map(|s| s.swap_dir())
             .collect_vec();
@@ -363,48 +386,51 @@ impl MidWildSequence {
         if self.front.len() == 0 {
             // * -> *
             if self.back.len() == 0 {
-                return vec![PCPSequence::MidExact(MidExactSequence{mid: "".to_string(), dir:PCPDir::UP})];
+                return vec![PCPSequence::MidExact(MidExactSequence {
+                    mid: "".to_string(),
+                    dir: PCPDir::UP,
+                })];
             }
         }
 
-        let mut ret: Vec<PCPSequence> = vec![];
         if self.front.len() == 0 {
-            ret.extend(PCPSequence::MidExact(MidExactSequence {
+            return PCPSequence::MidExact(MidExactSequence {
                 mid: self.back.clone(),
                 dir: self.dir,
-            }).apply_tile(tile));
+            })
+            .apply_tile(tile, is_ok);
         }
 
         if self.front.starts_with(&tile.dn) {
-            ret.push(PCPSequence::MidWild(MidWildSequence {
+            return vec![PCPSequence::MidWild(MidWildSequence {
                 front: self.front[tile.dn.len()..].to_string(),
                 back: self.back.clone() + &tile.up,
                 dir: self.dir,
-            }));
+            })];
         }
 
+        let mut ret: Vec<PCPSequence> = vec![];
         if self.front.len() > 0 && tile.dn.starts_with(&self.front) {
-            ret.push(PCPSequence::MidWild(MidWildSequence {
-                front: "".to_string(),
-                back: self.back.clone() + &tile.up,
+            let c = PCPSequence::MidWild(MidWildSequence {
+                front: tile.dn.clone(),
+                back: self.back.clone(),
                 dir: self.dir,
-            }));
+            });
+            if is_ok(&c) {
+                ret.extend(c.apply_tile(tile, is_ok));
+            }
 
             for mid_chars in 0..tile.dn.len() - self.front.len() {
                 let suf = tile.dn[self.front.len() + mid_chars..].to_string();
-                let upper = self.back.clone() + &tile.up;
-                if upper.starts_with(&suf) {
-                    ret.push(PCPSequence::Exact(ExactSequence {
-                        seq: upper[suf.len()..].to_string(),
+                if self.back.starts_with(&suf) || suf.starts_with(&self.back) {
+                    let mid = tile.dn[self.front.len()..self.front.len() + mid_chars].to_string();
+                    let c = PCPSequence::Exact(ExactSequence {
+                        seq: self.front.clone() + &mid + &self.back,
                         dir: self.dir,
-                    }));
-                }
-
-                if suf.starts_with(&upper) {
-                    ret.push(PCPSequence::Exact(ExactSequence {
-                        seq: suf[upper.len()..].to_string(),
-                        dir: self.dir.opposite(),
-                    }))
+                    });
+                    if is_ok(&c) {
+                        ret.extend(c.apply_tile(tile, is_ok));
+                    }
                 }
             }
         }
@@ -413,15 +439,14 @@ impl MidWildSequence {
     }
 }
 
-
 impl MidExactSequence {
-    fn apply_tile(&self, tile: &Tile) -> Vec<PCPSequence> {
+    fn apply_tile(&self, tile: &Tile, is_ok: &impl Fn(&PCPSequence) -> bool) -> Vec<PCPSequence> {
         if self.dir == PCPDir::DN {
             return MidExactSequence {
                 mid: self.mid.clone(),
                 dir: self.dir.opposite(),
             }
-            .apply_tile(&tile.swap_tile())
+            .apply_tile(&tile.swap_tile(), is_ok)
             .into_iter()
             .map(|s| s.swap_dir())
             .collect_vec();
@@ -430,40 +455,30 @@ impl MidExactSequence {
         // 完全に .*self.mid.* の最初の .* に飲まれて、 .*self.mid.*tail は .*self.mid.* に含まれるので無視していい
         let mut ret: Vec<PCPSequence> = vec![PCPSequence::MidExact(self.clone())];
 
+        if self.mid.len() == 0 {
+            return ret;
+        }
         for start_len in 0..tile.dn.len() {
-            let rest_dn = &tile.dn[start_len..];
-
+            let rest_dn = tile.dn[start_len..].to_string();
             if rest_dn.starts_with(&self.mid) {
-                ret.push(PCPSequence::MidWild(MidWildSequence {
-                    front: "".to_string(),
-                    back: tile.up.clone(),
+                let c = PCPSequence::MidWild(MidWildSequence {
+                    front: tile.dn[..start_len + self.mid.len()].to_string(),
+                    back: "".to_string(),
                     dir: self.dir,
-                }));
-
-                for mid_chars in 0..rest_dn.len() - self.mid.len() {
-                    let suf = rest_dn[self.mid.len() + mid_chars..].to_string();
-                    let upper = tile.up.clone();
-                    if upper.starts_with(&suf) {
-                        ret.push(PCPSequence::Exact(ExactSequence {
-                            seq: upper[suf.len()..].to_string(),
-                            dir: self.dir,
-                        }));
-                    }
-
-                    if suf.starts_with(&upper) {
-                        ret.push(PCPSequence::Exact(ExactSequence {
-                            seq: suf[upper.len()..].to_string(),
-                            dir: self.dir.opposite(),
-                        }))
-                    }
+                });
+                if is_ok(&c) {
+                    ret.extend(c.apply_tile(tile, is_ok))
                 }
             }
-            if self.mid.starts_with(rest_dn) {
-                ret.push(PCPSequence::MidWild(MidWildSequence {
-                    front: self.mid[rest_dn.len()..].to_string(),
-                    back: tile.up.clone(),
+            if self.mid.starts_with(&rest_dn) {
+                let c = PCPSequence::MidWild(MidWildSequence {
+                    front: tile.dn[..start_len].to_string() + &self.mid,
+                    back: "".to_string(),
                     dir: self.dir,
-                }))
+                });
+                if is_ok(&c) {
+                    ret.extend(c.apply_tile(tile, is_ok))
+                }
             }
         }
 

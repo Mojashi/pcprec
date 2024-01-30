@@ -3,4 +3,3 @@ pcp: PCP { tiles: [Tile { up: "1111", dn: "110" }, Tile { up: "1011", dn: "1" },
 reversed: false
 result: false
 Result { assumptions: [Exact(ExactSequence { seq: "011", dir: UP })], result: true, start: Exact(ExactSequence { seq: "011", dir: UP }) }
-Result { assumptions: [Exact(ExactSequence { seq: "011", dir: UP }), Exact(ExactSequence { seq: "01111", dir: DN }), Exact(ExactSequence { seq: "0110", dir: DN }), MidWild(MidWildSequence { front: "0", back: "", dir: DN }), MidWild(MidWildSequence { front: "0", back: "", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), MidExact(MidExactSequence { mid: "0110", dir: DN }), Exact(ExactSequence { seq: "1011", dir: UP }), Exact(ExactSequence { seq: "0111011", dir: UP })], result: false, start: Exact(ExactSequence { seq: "111", dir: DN }) }

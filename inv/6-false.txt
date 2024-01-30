@@ -1,0 +1,4 @@
+pcp: "PCP(Vector(Tile(1111,100), Tile(0011,1), Tile(1,1111)))"
+pcp: PCP { tiles: [Tile { up: "1111", dn: "100" }, Tile { up: "0011", dn: "1" }, Tile { up: "1", dn: "1111" }] }
+reversed: false
+result: false
