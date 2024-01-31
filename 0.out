@@ -81,6 +81,6 @@ upper true: "11111011111101110"
 upper true: "11111111101111110"
 upper true: "111111111111111111"
 upper true:  "1011111111111111111"
-011111111110111111
+011111111111111
 recursive strings: [MidExact(MidExactSequence { mid: "0110", dir: UP }), MidExact(MidExactSequence { mid: "0111101111110", dir: UP }), MidExact(MidExactSequence { mid: "0111111011110", dir: UP }), MidExact(MidExactSequence { mid: "011111101111110", dir: UP }), MidExact(MidExactSequence { mid: "01111110111111111", dir: UP }), MidExact(MidExactSequence { mid: "11111011101111110", dir: UP }), MidExact(MidExactSequence { mid: "11111011111101110", dir: UP }), MidExact(MidExactSequence { mid: "11111111101111110", dir: UP }), MidExact(MidExactSequence { mid: "111111111111111111", dir: UP }), MidExact(MidExactSequence { mid: "1011111111111111111", dir: UP })]
 all ok
