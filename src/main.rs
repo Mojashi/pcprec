@@ -17,9 +17,9 @@ use std::{
 use crate::pcpseq::{ExactSequence, MidWildSequence, PCPDir};
 
 fn substrings(s: &str, min_len: usize, max_len: usize) -> Vec<String> {
-    let mut ret: Vec<String> = (min_len..min(s.len(), max_len + 1))
-        .flat_map(|l| -> Vec<String> {
-            (0..s.len() - l).map(|i| s[i..i + l].to_string()).collect()
+    let mut ret: Vec<String> = (min_len..=min(s.len(), max_len))
+        .flat_map(|l: usize| -> Vec<String> {
+            (0..=s.len() - l).map(|i| s[i..i + l].to_string()).collect()
         })
         .collect();
     ret.sort();
@@ -27,11 +27,18 @@ fn substrings(s: &str, min_len: usize, max_len: usize) -> Vec<String> {
     ret
 }
 
+#[test]
+fn test_substrings() {
+    let r = substrings("abcde", 2, 4);
+
+    assert_eq!(r, vec!["ab", "abc", "abcd", "bc", "bcd", "bcde", "cd", "cde", "de"]);
+}
+
 fn abstract_seq(seq: &PCPSequence, min_len: usize, max_len: usize) -> Vec<PCPSequence> {
     //return vec![seq.clone()];
     match seq {
         PCPSequence::Exact(e) => {
-            let mut ret = substrings(&e.seq, min_len, max_len)
+            let ret = substrings(&e.seq, min_len, min(max_len, e.seq.len() - 1))
                 .into_iter()
                 .map(|s| PCPSequence::MidExact(MidExactSequence { mid: s, dir: e.dir }))
                 .collect_vec();
@@ -58,11 +65,11 @@ fn abstract_seq(seq: &PCPSequence, min_len: usize, max_len: usize) -> Vec<PCPSeq
             //     dir: e.dir,
             // }));
 
-            ret.push(PCPSequence::MidWild(MidWildSequence {
-                front: e.front[..min(e.front.len(), 5)].to_string(),
-                back: "".to_string(),
-                dir: e.dir,
-            }));
+            // ret.push(PCPSequence::MidWild(MidWildSequence {
+            //     front: e.front[..min(e.front.len(), 5)].to_string(),
+            //     back: "".to_string(),
+            //     dir: e.dir,
+            // }));
 
             // ret.push(PCPSequence::MidWild(MidWildSequence {
             //     front: e.front[..min(e.front.len(), max_len)].to_string(),
@@ -73,7 +80,7 @@ fn abstract_seq(seq: &PCPSequence, min_len: usize, max_len: usize) -> Vec<PCPSeq
             //vec![seq.clone()]
         }
         PCPSequence::MidExact(e) => {
-            let ret = substrings(&e.mid, min_len, max_len)
+            let ret = substrings(&e.mid, min_len, min(max_len, e.mid.len() - 1))
                 .into_iter()
                 .map(|s| PCPSequence::MidExact(MidExactSequence { mid: s, dir: e.dir }))
                 .collect_vec();
@@ -200,16 +207,23 @@ fn check_reach_empty(
 ) -> bool {
     let mut q = BinaryHeap::<(i32, PCPSequence)>::new();
 
-    q.push((-(s.num_chars() as i32), s.clone()));
+    q.push((-(match s {
+        PCPSequence::Exact(e) => e.seq.len() as i32,
+        PCPSequence::MidExact(e) => e.mid.len() as i32 - 10000,
+        PCPSequence::MidWild(e) => e.front.len() as i32 + e.back.len() as i32 - 1000,
+    }), s.clone()));
 
     let mut visited: HashSet<PCPSequence> = HashSet::new();
+    let mut visited_exacts: HashSet<PCPSequence> = HashSet::new();
 
-    while (visited.len() as u32) < max_iter && q.len() > 0 {
+    while ((visited.len() + visited_exacts.len()) as u32) < max_iter && q.len() > 0 {
         let (_, seq) = q.pop().unwrap();
         if seq.contains_empty() {
             return true;
         }
-        if visited.iter().any(|f| f.contains(&seq)) || assumptions.iter().any(|f| f.contains(&seq))
+        if visited.iter().any(|f| f.contains(&seq))
+            || visited_exacts.contains(&seq)
+            || assumptions.iter().any(|f| f.contains(&seq))
         {
             continue;
         }
@@ -218,20 +232,33 @@ fn check_reach_empty(
         }
 
         let next = seq.apply_pcp(pcp, |s| true);
-        visited.insert(seq);
+        match seq {
+            PCPSequence::Exact(_) => {
+                visited_exacts.insert(seq);
+            }
+            _ => {
+                visited.insert(seq);
+            }
+        }
 
         for n in next.iter() {
             if n.contains_empty() {
                 return true;
             }
-            if visited.iter().any(|f| f.contains(&n)) || assumptions.iter().any(|f| f.contains(&n))
+            if visited.iter().any(|f| f.contains(&n))
+                || visited_exacts.contains(&n)
+                || assumptions.iter().any(|f| f.contains(&n))
             {
                 continue;
             }
             if emptied.iter().any(|f| n.contains(f)) {
                 return true;
             }
-            q.push((-(n.num_chars() as i32), n.clone()));
+            q.push((-(match n {
+                PCPSequence::Exact(e) => e.seq.len() as i32,
+                PCPSequence::MidExact(e) => e.mid.len() as i32 - 10000,
+                PCPSequence::MidWild(e) => e.front.len() as i32 + e.back.len() as i32 - 1000,
+            }), n.clone()));
         }
     }
 
@@ -313,30 +340,43 @@ fn check_recursive(
         }
         return TimeoutResult::Result(false);
     }
+    // println!(
+    //     "conclusions: {:?}",
+    //     conclusions.iter().map(|s| s.len()).collect_vec()
+    // );
     let guarded = assumptions
         .iter()
         .chain(conclusions.iter().flatten())
         .collect_vec();
-    // if all_exact {
-    //     println!("all exact {:?}", depthlimit);
-    // }
     if depthlimit <= 0 {
-        //println!("timeout {:?} {:?}", cur, theorem_checking);
         return TimeoutResult::Timeout;
     }
     if state.emptied.iter().any(|f| cur.contains(f)) {
-        //println!("emptied! {:?}", emptied.iter().find(|f| cur.contains(f)));
         return TimeoutResult::Result(false);
     }
-    //println!("cur: {:?}", cur, );
-    //println!("{:?}", assumptions.len());
 
     if guarded.iter().any(|s| -> bool { s.contains(cur) }) {
         //println!("assumption hit!");
         return TimeoutResult::Result(true);
     }
 
-    let mut abstractions = abstract_seq(&cur, 0, 30);
+    let mut abstractions = 
+        abstract_seq(&cur, 1, 30)
+        .into_iter()
+        .filter(|s| -> bool { state.emptied.iter().all(|f| !s.contains(f))})
+        .collect_vec();
+
+    println!("assumptions: {:?}", assumptions);
+    println!("cur: {:?}", cur);
+    if abstractions.len() > 0 {
+        println!("checking");
+        if check_reach_empty(state.pcp, cur, &mut vec![], &state.emptied, 1000) {
+            state.emptied.push((*cur).clone());
+            println!("reachable {:?}", cur);
+            return TimeoutResult::Result(false);
+        }
+        println!("ok");
+    }
     abstractions.push((*cur).clone());
 
     let mut non_abstracted_empty = false;
@@ -356,10 +396,14 @@ fn check_recursive(
                 && conclusions.iter().flatten().all(|f| !f.contains(s))
         };
         let mut nexts: Vec<PCPSequence> = s.apply_pcp_avoid_midwild(&state.pcp, new_is_ok);
-
+        
         refine_recursive_seqs(&mut nexts);
 
-        nexts.sort_by_key(|s| s.num_chars());
+        nexts.sort_by_key(|s| match s {
+            PCPSequence::Exact(e) => e.seq.len() as i32,
+            PCPSequence::MidExact(e) => e.mid.len() as i32 - 10000,
+            PCPSequence::MidWild(e) => e.front.len() as i32 + e.back.len() as i32 - 1000,
+        });
         assumptions.push(s.clone());
         log::debug!("nexts: {:?}", nexts);
 
@@ -470,8 +514,7 @@ fn check_recursive(
                         if check_reach_empty(state.pcp, s, &vec![], &state.emptied, 10000) {
                             println!("lost reachable {:?}", s);
                             state.emptied.push((*s).clone());
-                        }
-                        else {
+                        } else {
                             println!("lost unreachable {:?}", s);
                             // let mut newAss = assumptions.iter().take(sofar_count).map(|s| s.clone()).collect_vec();
                             // let mut newConc = conclusions.iter().take(sofar_count + 1).map(|s| s.clone()).collect_vec();
@@ -497,14 +540,16 @@ fn check_recursive(
                     conclusions[sofar_count].extend(vec![s.clone()]);
                     conclusions[sofar_count].extend(l.clone());
                     if lMidExact.len() > 0 {
-                        println!("conclusionSizes: {:?}", conclusions.iter().take(20).map(|c| c.len()).collect_vec());
+                        println!(
+                            "conclusionSizes: {:?}",
+                            conclusions.iter().take(20).map(|c| c.len()).collect_vec()
+                        );
                         println!("level: {:?} brought: {:?}", sofar_count, lMidExact);
                     }
                     conclusions.truncate(sofar_count + 1);
                     assumptions.truncate(sofar_count);
                     return TimeoutResult::Result(true);
-                }
-                else {
+                } else {
                     if lMidExact.len() > 0 {
                         println!("empty lost {:?}", lMidExact);
                     }
@@ -548,7 +593,9 @@ fn pdr_like(pcp: &PCP) -> (bool, Vec<Result>) {
             let max_depth = 1 << max_depth_log;
             println!("max_depth: {:?}", max_depth);
             let mut assumptions = vec![];
-            let mut conclusions = vec![];
+            let mut conclusions = vec![
+                //theorems.clone(),
+            ];
             let r = check_recursive(
                 &PCPSequence::Exact(s.clone()),
                 &mut assumptions,
@@ -559,10 +606,12 @@ fn pdr_like(pcp: &PCP) -> (bool, Vec<Result>) {
                 &mut state,
             );
             println!("start: {:?} result: {:?}", s.seq, r.succeeded());
-            theorems.extend(conclusions.into_iter().flatten());
+            println!("assumptions: {:?}", assumptions);
+            println!("conclusions: {:?}", conclusions);
+            theorems.extend(conclusions.iter().flatten().cloned());
             if r.succeeded() {
                 results.push(Result {
-                    assumptions: theorems.clone(),
+                    assumptions: conclusions.into_iter().flatten().collect_vec(),
                     result: r.succeeded(),
                     start: PCPSequence::Exact(s.clone()),
                 });
@@ -940,7 +989,7 @@ fn check_valid_proof(pcp: &PCP, result: &Result) -> bool {
     }
     let is_ok = pcp_isok(pcp);
     for p in result.assumptions.iter() {
-        let nexts = p.apply_pcp(pcp, Box::new(&is_ok));
+        let nexts = p.apply_pcp_avoid_midwild(pcp, Box::new(&is_ok));
 
         for n in nexts {
             if result
@@ -1062,7 +1111,7 @@ fn main() {
 
     apply_pdr();
 
-    for (idx, (raw, pcp)) in pcps.iter().enumerate().skip(1) {
+    for (idx, (raw, pcp)) in pcps.iter().enumerate().skip(6) {
         let pcp = &pcp.reverse_pcp().swap_pcp();
         println!("{idx} pcp: {:?}", pcp);
         let (us, ds) = find_nonempty_substrs(&pcp);

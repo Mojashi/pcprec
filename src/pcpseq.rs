@@ -245,10 +245,7 @@ impl PCPSequence {
                 _ => false,
             });
         
-        let mut ret: HashSet<PCPSequence> = non_wilds
-            .into_iter()
-            .flat_map(|s| s.apply_pcp(pcp, &is_ok))
-            .collect();
+        let mut ret: HashSet<PCPSequence> = non_wilds.into_iter().collect();
         let mut visitedWilds: HashSet<PCPSequence> = HashSet::new();
         
         
