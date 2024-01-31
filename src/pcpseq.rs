@@ -246,11 +246,11 @@ impl PCPSequence {
             });
         
         let mut ret: HashSet<PCPSequence> = non_wilds.into_iter().collect();
-        let mut visitedWilds: HashSet<PCPSequence> = HashSet::new();
+        let mut visited_wilds: HashSet<PCPSequence> = HashSet::new();
         
         
         while wilds.len() > 0 {
-            visitedWilds.extend(wilds.clone());
+            visited_wilds.extend(wilds.clone());
             let (nwilds, nnon_wilds): (Vec<PCPSequence>, Vec<PCPSequence>) = wilds
                 .into_iter()
                 .flat_map(|s| s.apply_pcp(pcp, |s| true))
@@ -272,7 +272,7 @@ impl PCPSequence {
                     PCPSequence::MidWild(_) => true,
                     _ => false,
                 });
-            wilds = nwilds.into_iter().filter(|s| !visitedWilds.contains(s)).collect_vec();
+            wilds = nwilds.into_iter().filter(|s| !visited_wilds.contains(s)).collect_vec();
             ret.extend(nnon_wilds);
         }
 

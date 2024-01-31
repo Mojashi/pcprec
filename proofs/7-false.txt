@@ -1,0 +1,6 @@
+pcp: "PCP(Vector(Tile(1111,11), Tile(111,1110), Tile(0,111)))"
+pcp: PCP { tiles: [Tile { up: "1111", dn: "11" }, Tile { up: "111", dn: "1110" }, Tile { up: "0", dn: "111" }] }
+reversed: false
+result: true
+Result { assumptions: [MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0", dir: UP })], result: true, start: Exact(ExactSequence { seq: "11", dir: UP }) }
+Result { assumptions: [MidExact(MidExactSequence { mid: "1", dir: UP }), MidExact(MidExactSequence { mid: "0", dir: UP }), Exact(ExactSequence { seq: "0", dir: DN }), Exact(ExactSequence { seq: "111", dir: DN }), Exact(ExactSequence { seq: "1", dir: DN }), Exact(ExactSequence { seq: "10", dir: DN }), Exact(ExactSequence { seq: "1110", dir: DN }), Exact(ExactSequence { seq: "01110", dir: DN }), Exact(ExactSequence { seq: "1110111", dir: DN }), Exact(ExactSequence { seq: "01111110", dir: DN }), Exact(ExactSequence { seq: "1111110111", dir: DN }), Exact(ExactSequence { seq: "11011111", dir: DN }), Exact(ExactSequence { seq: "11101111110", dir: DN }), MidExact(MidExactSequence { mid: "011111101110", dir: DN }), MidExact(MidExactSequence { mid: "011101111110", dir: DN })], result: true, start: Exact(ExactSequence { seq: "0", dir: DN }) }
