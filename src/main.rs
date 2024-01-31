@@ -360,8 +360,9 @@ fn check_recursive(
         return TimeoutResult::Result(true);
     }
 
+    let max_len = 30;
     let mut abstractions = 
-        abstract_seq(&cur, 1, 30)
+        abstract_seq(&cur, 1, max_len)
         .into_iter()
         .filter(|s| -> bool { state.emptied.iter().all(|f| !s.contains(f))})
         .collect_vec();
@@ -380,7 +381,11 @@ fn check_recursive(
     match cur {
         PCPSequence::MidWild(_) => {},
         PCPSequence::Exact(_) => abstractions.push((*cur).clone()),
-        PCPSequence::MidExact(_) => {},
+        PCPSequence::MidExact(m) => {
+            if m.mid.len() <= max_len {
+                abstractions.push((*cur).clone());
+            }
+        },
     }
 
     let mut non_abstracted_empty = false;
