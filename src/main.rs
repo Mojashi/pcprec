@@ -378,9 +378,9 @@ fn check_recursive(
         println!("ok");
     }
     match cur {
-        PCPSequence::MidWild(_) => todo!(),
+        PCPSequence::MidWild(_) => {},
         PCPSequence::Exact(_) => abstractions.push((*cur).clone()),
-        PCPSequence::MidExact(_) => todo!(),
+        PCPSequence::MidExact(_) => {},
     }
 
     let mut non_abstracted_empty = false;
