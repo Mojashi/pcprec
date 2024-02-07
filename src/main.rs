@@ -1224,14 +1224,18 @@ fn reduce_checking(pcp: &PCP, iter: usize) -> bool {
 }
 
 fn sanity_check_reduce_pcp_aut() {
+    //let pcps = parse_file("a.csv").into_iter().map(|s| s.1).collect_vec();
     let pcps = parse_instance_list("200hard.txt");
-    for pcp in pcps.iter() {
-        println!("pcp: {:?}", pcp);
-        let res = reduce_checking(pcp.clone(), 4);
-        println!("result: {:?}", res);
-        if res  {
-            panic!("fail");
-        }
+    let input = std::env::args().collect_vec();
+    let idx = input[1].parse::<usize>().unwrap();
+
+    let pcp = &pcps[idx];
+
+    println!("pcp: {:?}", pcp);
+    let res: bool = reduce_checking(pcp, 10);
+    println!("result: {:?}", res);
+    if res  {
+        panic!("fail");
     }
 }
 
