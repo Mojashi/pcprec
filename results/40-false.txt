@@ -1,0 +1,4 @@
+pcp: "PCP(Vector(Tile(1100,1), Tile(111,00), Tile(1,111)))"
+pcp: PCP { tiles: [Tile { up: "1100", dn: "1" }, Tile { up: "111", dn: "00" }, Tile { up: "1", dn: "111" }] }
+reversed: false
+result: [MidExact(MidExactSequence { mid: "0110", dir: UP })]

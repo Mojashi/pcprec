@@ -1,6 +1,5 @@
 use regex::Regex;
 
-
 #[derive(Debug)]
 pub struct Tile {
     pub up: String,
@@ -22,12 +21,27 @@ pub struct PCP {
 }
 
 impl PCP {
+    // parse string like PCP(Vector(Tile(1110,1), Tile(1,0), Tile(0,1110)))
+    pub fn parse_pcp_string(s: &str) -> PCP {
+        let r = Regex::new(r"Tile\((\d+),(\d+)\)").unwrap();
+
+        let tiles = r
+            .captures_iter(s)
+            .map(|cap| Tile {
+                up: cap[1].to_string(),
+                dn: cap[2].to_string(),
+            })
+            .collect();
+
+        PCP { tiles: tiles }
+    }
+
     pub fn swap_pcp(&self) -> PCP {
         PCP {
             tiles: self.tiles.iter().map(|tile| tile.swap_tile()).collect(),
         }
     }
-    
+
     pub fn reverse_pcp(&self) -> PCP {
         PCP {
             tiles: self
@@ -40,21 +54,6 @@ impl PCP {
                 .collect(),
         }
     }
-}
-
-// parse string like PCP(Vector(Tile(1110,1), Tile(1,0), Tile(0,1110)))
-pub fn parse_pcp_string(s: &str) -> PCP {
-    let r = Regex::new(r"Tile\((\d+),(\d+)\)").unwrap();
-
-    let tiles = r
-        .captures_iter(s)
-        .map(|cap| Tile {
-            up: cap[1].to_string(),
-            dn: cap[2].to_string(),
-        })
-        .collect();
-
-    PCP { tiles: tiles }
 }
 
 fn gen_random_pcp(num_tile: usize, tile_size: usize) -> PCP {

@@ -1,0 +1,9 @@
+digraph {
+"q6" -> "q4" [label="(None, Some('0'))"]
+"q5" -> "q6" [label="(None, Some('0'))"]
+"q4" -> "q4" [label="(Some('0'), Some('1'))"]
+"q4" -> "q5" [label="(Some('1'), Some('1'))"]
+"q4" [shape=doublecircle]
+q10 [shape=point]
+q10 -> "q4"
+}

@@ -1,18 +1,19 @@
 mod pcp;
 mod pcpseq;
+mod automaton;
+mod conf_automaton;
 
 use itertools::Itertools;
-use pcp::{parse_pcp_string, Tile, PCP};
+use pcp::{Tile, PCP};
 use pcpseq::{MidExactSequence, PCPSequence};
-use rand::seq::SliceRandom;
-use regex::Regex;
 
+use regex::Regex;
 use core::panic;
 use std::{
-    borrow::BorrowMut, cmp::{max, min}, collections::{BinaryHeap, HashSet, VecDeque}, io::{BufRead, Write}, os::macos::raw, rc::Rc
+    cmp::{max, min}, collections::{BinaryHeap, HashSet, VecDeque}, io::{BufRead, Write}, rc::Rc
 };
 
-use crate::pcpseq::{ExactSequence, MidWildSequence, PCPDir};
+use crate::pcpseq::{ExactSequence, PCPDir};
 
 fn substrings(s: &str, min_len: usize, max_len: usize) -> Vec<String> {
     let mut ret: Vec<String> = (min_len..=min(s.len(), max_len))
@@ -391,7 +392,8 @@ fn check_recursive(
     let mut abstractions = abstract_seq(&cur, 1, max_len)
         .into_iter()
         .filter(|s| -> bool {
-            if state.emptied.iter().any(|f| s.contains(f)) {
+            if let Some(f) = state.emptied.iter().find(|f| s.contains(f)) {
+                //println!("emptied: {:?} {:?}", s, f);
                 return false;
             }
             // if !check_reach_empty(state.pcp, s, &vec![], &state.emptied, 1000) {
@@ -409,6 +411,7 @@ fn check_recursive(
     });
 
     abstractions.push((*cur).clone());
+    println!("abstractions: {:?}", abstractions.len());
 
     let mut non_abstracted_empty = false;
     for s in abstractions.iter() {
@@ -424,8 +427,8 @@ fn check_recursive(
 
         let new_is_ok = |s: &PCPSequence| {
             (state.is_ok)(s)
-                && assumptions.iter().all(|f| !f.contains(s))
-                && conclusions.iter().flatten().all(|f| !f.contains(s))
+                // && assumptions.iter().all(|f| !f.contains(s))
+                // && conclusions.iter().flatten().all(|f| !f.contains(s))
         };
 
         // if check_reach_empty(state.pcp, s, &mut vec![], &state.emptied, 100) {
@@ -440,16 +443,12 @@ fn check_recursive(
         let mut nexts: Vec<PCPSequence> = s.apply_pcp_avoid_midwild(&state.pcp, new_is_ok);
         println!("nexts: {:?}", nexts.len());
 
-        refine_recursive_seqs(&mut nexts);
+        //refine_recursive_seqs(&mut nexts);
 
-        nexts.sort_by_key(|s| match s {
-            PCPSequence::Exact(e) => e.seq.len() as i32,
-            PCPSequence::MidExact(e) => (e.mid.len() as i32) - 10000,
-            PCPSequence::MidWild(e) => e.front.len() as i32 + e.back.len() as i32 - 1000,
-        });
+        nexts.sort_by_key(|s| (s.num_chars() as i32));
         //nexts.shuffle(&mut rand::thread_rng());
         assumptions.push(s.clone());
-        log::debug!("nexts: {:?}", nexts);
+        println!("refined nexts: {:?}", nexts.len());
 
         let mut nexts_all_ok: TimeoutResult = TimeoutResult::Success(SuccessResult {
             max_assumption_idx: -1,
@@ -597,10 +596,18 @@ fn pdr_like(pcp: &PCP, max_len: usize) -> (bool, Vec<Result>) {
     let mut state = AbstractDFSState::new(pcp);
 
     let mut results = vec![];
-    let mut theorems = vec![];
+    let mut theorems = vec![
+        // PCPSequence::MidExact(MidExactSequence { mid: "011111110".to_string(), dir: PCPDir::DN }), 
+        // PCPSequence::MidExact(MidExactSequence { mid: "0111111111110".to_string(), dir: PCPDir::DN }),
+        // PCPSequence::MidExact(MidExactSequence { mid: "0111111110".to_string(), dir: PCPDir::UP }), 
+        // PCPSequence::MidExact(MidExactSequence { mid: "010".to_string(), dir: PCPDir::DN }), 
+        // PCPSequence::MidExact(MidExactSequence { mid: "0110".to_string(), dir: PCPDir::DN }), 
+        // PCPSequence::MidExact(MidExactSequence { mid: "011111101111110".to_string(), dir: PCPDir::DN }),
+        // PCPSequence::MidExact(MidExactSequence { mid: "01110".to_string(), dir: PCPDir::UP }), 
+    ];
     for s in firsts {
         let mut has_ok = false;
-        for max_depth_log in 20..40 {
+        for max_depth_log in 20..30 {
             let max_depth = 1 << max_depth_log;
             println!("max_depth: {:?}", max_depth);
             let mut assumptions = vec![];
@@ -693,7 +700,7 @@ fn parse_file(f: &str) -> Vec<(String, PCP)> {
     let lines = std::io::BufReader::new(f).lines().collect_vec();
     for result in lines.iter() {
         let record = result.as_ref().unwrap();
-        let pcp = parse_pcp_string(&record.as_str());
+        let pcp = PCP::parse_pcp_string(&record.as_str());
         ret.push((record.to_string(), pcp));
     }
     ret
@@ -780,7 +787,7 @@ fn get_nonempty_for_pcps() {
 fn from_input() {
     let mut input_str = String::new();
     std::io::stdin().read_line(&mut input_str).unwrap();
-    let pcp = parse_pcp_string(&input_str);
+    let pcp = PCP::parse_pcp_string(&input_str);
     println!("pcp: {:?}", pcp);
 
     let (upper_trues, lower_trues) = find_nonempty_substrs(&pcp);
@@ -1082,9 +1089,9 @@ fn hard_instances_check() {
 }
 
 fn check_sanity() {
-    let pcp = &parse_pcp_string("PCP(Vector(Tile(100,1), Tile(0,100), Tile(1,00)))");
+    let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(100,1), Tile(0,100), Tile(1,00)))");
     println!("pcp: {:?}", pcp);
-    let (res, results) = pdr_like(pcp, 20);
+    let (res, results) = pdr_like(&pcp, 20);
     println!("result: {:?}", res);
     if res {
         let refined = refine_proof(&pcp, results[0].clone());
@@ -1204,7 +1211,7 @@ fn find_recursive_strings_for_pcp() {
 }
 
 fn main() {
-    find_recursive_strings_for_pcp()
+    //find_recursive_strings_for_pcp()
 
     //check_sanity();
     //let pcps = parse_file("a.csv");
@@ -1231,7 +1238,7 @@ fn main() {
     // apply_pdr_single(123, &lorents, "PCP(Vector(Tile(10, 0), Tile(0, 001), Tile(001, 1)))", false);
     //apply_pdr_single(21, &pcps[21].1, &pcps[21].0, false);
 
-    // apply_pdr();
+    apply_pdr();
 
     // apply_pdr(false);
     // for _ in 0..1000 {

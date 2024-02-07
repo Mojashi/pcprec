@@ -1,0 +1,12 @@
+digraph {
+q6 -> q7 [label="(None, Some('0'))"]
+q8 -> q9 [label="(None, Some('1'))"]
+q5 -> q6 [label="(None, Some('1'))"]
+q3 -> q4 [label="(None, Some('1'))"]
+q10 -> q11 [label="(None, Some('0'))"]
+q2 -> q3 [label="(Some('0'), None)"]
+q2 -> q8 [label="(Some('1'), None)"]
+q2 -> q10 [label="(Some('2'), None)"]
+q4 -> q5 [label="(None, Some('1'))"]
+q1 [shape=circle]
+}
