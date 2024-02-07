@@ -1210,7 +1210,33 @@ fn find_recursive_strings_for_pcp() {
         .unwrap();
 }
 
+fn reduce_checking(pcp: &PCP, iter: usize) -> bool {
+    let mut reduced_aut = pcp.to_automaton();
+    for i in 0..iter {
+        reduced_aut = reduced_aut.construct_reduced_automaton();
+        assert!(reduced_aut.upper.get_input_nfa().accept(&vec![]));
+        assert!(reduced_aut.lower.get_input_nfa().accept(&vec![]));
+    }
+
+    let upper_size = reduced_aut.upper.transition.values().flatten().collect_vec().len();
+    let lower_size = reduced_aut.lower.transition.values().flatten().collect_vec().len();
+    return upper_size == 0 || lower_size == 0;
+}
+
+fn sanity_check_reduce_pcp_aut() {
+    let pcps = parse_instance_list("200hard.txt");
+    for pcp in pcps.iter() {
+        println!("pcp: {:?}", pcp);
+        let res = reduce_checking(pcp.clone(), 4);
+        println!("result: {:?}", res);
+        if res  {
+            panic!("fail");
+        }
+    }
+}
+
 fn main() {
+    sanity_check_reduce_pcp_aut();
     //find_recursive_strings_for_pcp()
 
     //check_sanity();
@@ -1238,7 +1264,7 @@ fn main() {
     // apply_pdr_single(123, &lorents, "PCP(Vector(Tile(10, 0), Tile(0, 001), Tile(001, 1)))", false);
     //apply_pdr_single(21, &pcps[21].1, &pcps[21].0, false);
 
-    apply_pdr();
+    //apply_pdr();
 
     // apply_pdr(false);
     // for _ in 0..1000 {

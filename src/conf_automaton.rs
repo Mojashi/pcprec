@@ -15,8 +15,8 @@ pub struct PCPConf {
 
 pub struct PCPAutomaton {
     // these domains are the same
-    upper: automaton::Transducer<char, char>,
-    lower: automaton::Transducer<char, char>,
+    pub upper: automaton::Transducer<char, char>,
+    pub lower: automaton::Transducer<char, char>,
 }
 
 #[test]
@@ -55,8 +55,7 @@ fn test_reduced_aut() {
 
 #[test]
 fn test_reduced_aut2() {
-    let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(1111,1), Tile(1,1110), Tile(0,111)))");
-    //let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(110,1), Tile(1,0), Tile(0,100)))");
+    let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(1101,1), Tile(1,101), Tile(0,011)))");
     let mut reduced_aut = pcp.to_automaton();
     for i in 0..6 {
         reduced_aut = reduced_aut.construct_reduced_automaton();
