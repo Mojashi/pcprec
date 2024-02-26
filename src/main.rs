@@ -1,19 +1,15 @@
-mod pcp;
-mod pcpseq;
-mod automaton;
-mod conf_automaton;
-
 use itertools::Itertools;
-use pcp::{Tile, PCP};
-use pcpseq::{MidExactSequence, PCPSequence};
+use pcp_rec_str::pcp::{Tile, PCP, PCPDir};
+use pcp_rec_str::pcpseq::{ExactSequence, MidExactSequence, PCPSequence};
 
-use regex::Regex;
 use core::panic;
+use regex::Regex;
 use std::{
-    cmp::{max, min}, collections::{BinaryHeap, HashSet, VecDeque}, io::{BufRead, Write}, rc::Rc
+    cmp::{max, min},
+    collections::{BinaryHeap, HashSet, VecDeque},
+    io::{BufRead, Write},
+    rc::Rc,
 };
-
-use crate::pcpseq::{ExactSequence, PCPDir};
 
 fn substrings(s: &str, min_len: usize, max_len: usize) -> Vec<String> {
     let mut ret: Vec<String> = (min_len..=min(s.len(), max_len))
@@ -427,8 +423,8 @@ fn check_recursive(
 
         let new_is_ok = |s: &PCPSequence| {
             (state.is_ok)(s)
-                // && assumptions.iter().all(|f| !f.contains(s))
-                // && conclusions.iter().flatten().all(|f| !f.contains(s))
+            // && assumptions.iter().all(|f| !f.contains(s))
+            // && conclusions.iter().flatten().all(|f| !f.contains(s))
         };
 
         // if check_reach_empty(state.pcp, s, &mut vec![], &state.emptied, 100) {
@@ -597,13 +593,13 @@ fn pdr_like(pcp: &PCP, max_len: usize) -> (bool, Vec<Result>) {
 
     let mut results = vec![];
     let mut theorems = vec![
-        // PCPSequence::MidExact(MidExactSequence { mid: "011111110".to_string(), dir: PCPDir::DN }), 
+        // PCPSequence::MidExact(MidExactSequence { mid: "011111110".to_string(), dir: PCPDir::DN }),
         // PCPSequence::MidExact(MidExactSequence { mid: "0111111111110".to_string(), dir: PCPDir::DN }),
-        // PCPSequence::MidExact(MidExactSequence { mid: "0111111110".to_string(), dir: PCPDir::UP }), 
-        // PCPSequence::MidExact(MidExactSequence { mid: "010".to_string(), dir: PCPDir::DN }), 
-        // PCPSequence::MidExact(MidExactSequence { mid: "0110".to_string(), dir: PCPDir::DN }), 
+        // PCPSequence::MidExact(MidExactSequence { mid: "0111111110".to_string(), dir: PCPDir::UP }),
+        // PCPSequence::MidExact(MidExactSequence { mid: "010".to_string(), dir: PCPDir::DN }),
+        // PCPSequence::MidExact(MidExactSequence { mid: "0110".to_string(), dir: PCPDir::DN }),
         // PCPSequence::MidExact(MidExactSequence { mid: "011111101111110".to_string(), dir: PCPDir::DN }),
-        // PCPSequence::MidExact(MidExactSequence { mid: "01110".to_string(), dir: PCPDir::UP }), 
+        // PCPSequence::MidExact(MidExactSequence { mid: "01110".to_string(), dir: PCPDir::UP }),
     ];
     for s in firsts {
         let mut has_ok = false;
@@ -930,73 +926,13 @@ fn apply_pdr() {
     let max_len = args[3].parse::<usize>().unwrap();
 
     let (raw, pcp) = &instances[instance_idx];
+
+    let mut pcp = &PCP::parse_pcp_string("Tile(110,1)Tile(1,01)Tile(0,110)");
+    let raw = "Tile(110,1)Tile(1,01)Tile(0,110)";
+    println!("pcp: {:?}", pcp);
+
     apply_pdr_single(instance_idx, &pcp, &raw, rev, max_len);
 }
-
-// fn check_recursive_bounded(pcp: &PCP, s: &str, dir: PCPDir) -> bool {
-//     let mut q = VecDeque::new();
-
-//     q.push_back(PCPSequence::MidWild(MidWildSequence {
-//         front: s.to_string(),
-//         back: "".to_string(),
-//         dir: dir,
-//     }));
-
-//     //println!("q: {:?}", q);
-
-//     let mut visited: HashSet<PCPSequence> = HashSet::new();
-
-//     let mut dot_string = String::new();
-//     dot_string += "digraph {\n";
-//     let mut reced = false;
-
-//     while visited.len() < 1000 && q.len() > 0 {
-//         let seq = q.pop_front().unwrap();
-
-//         if visited.contains(&seq) {
-//             continue;
-//         }
-//         visited.insert(seq.clone());
-
-//         let next = seq.apply_pcp(pcp);
-//         //println!("{:?} -> {:?}", seq, next);
-//         dot_string +=
-//             ("\"".to_owned() + &format!("{:?}", seq).replace("\"", "") + "\" -> {").as_str();
-//         for n in &next {
-//             dot_string += ("\"".to_owned() + &format!("{:?}", n).replace("\"", "") + "\"").as_str();
-//         }
-//         dot_string += "}\n";
-
-//         for n in next {
-//             if n.dir() == dir && n.contains_str(s) {
-//                 reced = true;
-//                 continue;
-//             }
-//             if visited.contains(&n) {
-//                 continue;
-//             }
-//             if match &n {
-//                 PCPSequence::Exact(e) => e.seq.len() == 0,
-//                 _ => false,
-//             } {
-//                 visited.insert(n.clone());
-//                 break;
-//             };
-//             q.push_back(n);
-//         }
-//     }
-
-//     dot_string += "}\n";
-//     //std::fs::write("graph.dot", dot_string).unwrap();
-
-//     let unreached_empty = visited.iter().all(|s| match s {
-//         PCPSequence::Exact(e) => e.seq.len() != 0,
-//         _ => true,
-//     });
-
-//     //println!("unreached_empty: {unreached_empty}");
-//     q.len() == 0 && unreached_empty && reced
-// }
 
 fn check_valid_proof(pcp: &PCP, result: &Result) -> bool {
     if result.assumptions.iter().any(|p| p.contains_empty()) {
@@ -1071,9 +1007,9 @@ fn refine_proof(pcp: &PCP, result: Result) -> Result {
 
 fn hard_instances_check() {
     let pcps = parse_instance_list("200hard.txt");
-    for pcp in pcps.iter() {
+    for pcp in pcps.iter().skip(9) {
         println!("pcp: {:?}", pcp);
-        let (res, results) = pdr_like(pcp, 20);
+        let (res, results) = pdr_like(pcp, 0);
         println!("result: {:?}", res);
         if res {
             let refined = refine_proof(&pcp, results[0].clone());
@@ -1188,6 +1124,7 @@ fn find_recursive_strings_for_pcp() {
     let idx = input[1].parse::<usize>().unwrap();
     let rev = input[2].parse::<bool>().unwrap();
     let mut pcp = &instances[idx].1;
+
     let rev_pcp = pcp.reverse_pcp().swap_pcp();
     let raw = &instances[idx].0;
 
@@ -1195,13 +1132,13 @@ fn find_recursive_strings_for_pcp() {
         pcp = &rev_pcp;
     }
 
-
     println!("pcp: {:?} idx: {idx} rev: {rev}", pcp);
     let res = find_recursive_strings(&pcp);
 
     let mut file = std::fs::File::create(
         "results/".to_string() + &idx.to_string() + "-" + &rev.to_string() + ".txt",
-    ).unwrap();
+    )
+    .unwrap();
     file.write(format!("pcp: {:?}\n", raw).as_bytes()).unwrap();
     file.write(format!("pcp: {:?}\n", pcp).as_bytes()).unwrap();
     file.write(format!("reversed: {:?}\n", rev).as_bytes())
@@ -1213,34 +1150,150 @@ fn find_recursive_strings_for_pcp() {
 fn reduce_checking(pcp: &PCP, iter: usize) -> bool {
     let mut reduced_aut = pcp.to_automaton();
     for i in 0..iter {
-        reduced_aut = reduced_aut.construct_reduced_automaton();
+        let n_reduced_aut = reduced_aut.construct_reduced_automaton();
+        assert!(n_reduced_aut
+            .upper
+            .get_input_nfa()
+            .is_equal(&n_reduced_aut.lower.get_input_nfa()));
+        if n_reduced_aut
+            .upper
+            .get_input_nfa()
+            .is_equal(&reduced_aut.upper.get_output_nfa())
+            && n_reduced_aut
+                .upper
+                .get_output_nfa()
+                .is_equal(&reduced_aut.upper.get_input_nfa())
+        {
+            reduced_aut = n_reduced_aut;
+
+            break;
+        }
+
+        assert!(reduced_aut
+            .upper
+            .get_output_nfa()
+            .includes(&n_reduced_aut.upper.get_input_nfa()));
+        assert!(reduced_aut
+            .lower
+            .get_output_nfa()
+            .includes(&n_reduced_aut.lower.get_input_nfa()));
+        println!(
+            "{:?}",
+            n_reduced_aut
+                .upper
+                .get_input_nfa()
+                .is_equal(&reduced_aut.upper.get_output_nfa())
+        );
+        println!(
+            "{:?}",
+            n_reduced_aut
+                .upper
+                .get_output_nfa()
+                .is_equal(&reduced_aut.upper.get_input_nfa())
+        );
+        println!(
+            "{:?}",
+            n_reduced_aut
+                .lower
+                .get_input_nfa()
+                .is_equal(&reduced_aut.lower.get_output_nfa())
+        );
+        println!(
+            "{:?}",
+            n_reduced_aut
+                .lower
+                .get_output_nfa()
+                .is_equal(&reduced_aut.lower.get_input_nfa())
+        );
+
+        reduced_aut = n_reduced_aut;
         assert!(reduced_aut.upper.get_input_nfa().accept(&vec![]));
         assert!(reduced_aut.lower.get_input_nfa().accept(&vec![]));
+        let upper_size = reduced_aut
+            .upper
+            .transition
+            .values()
+            .flatten()
+            .collect_vec()
+            .len();
+        let lower_size = reduced_aut
+            .lower
+            .transition
+            .values()
+            .flatten()
+            .collect_vec()
+            .len();
+        println!(
+            "iter: {:?} upper: {:?} lower: {:?}",
+            i, upper_size, lower_size
+        );
     }
 
-    let upper_size = reduced_aut.upper.transition.values().flatten().collect_vec().len();
-    let lower_size = reduced_aut.lower.transition.values().flatten().collect_vec().len();
+    reduced_aut.upper.show_dot("reduced/upper");
+    reduced_aut.lower.show_dot("reduced/lower");
+
+    let upper_size = reduced_aut
+        .upper
+        .transition
+        .values()
+        .flatten()
+        .collect_vec()
+        .len();
+    let lower_size = reduced_aut
+        .lower
+        .transition
+        .values()
+        .flatten()
+        .collect_vec()
+        .len();
     return upper_size == 0 || lower_size == 0;
 }
 
+#[test]
+fn test_reduced_checking() {
+    assert!(reduce_checking(&PCP::parse_pcp_string("Tile(100,1)"), 10));
+    assert!(!reduce_checking(&PCP::parse_pcp_string("Tile(1,1)"), 10));
+    assert!(!reduce_checking(
+        &PCP::parse_pcp_string("Tile(1,1)Tile(0,1)"),
+        4
+    ));
+    assert!(!reduce_checking(
+        &PCP::parse_pcp_string("Tile(01,1)Tile(1,10)"),
+        4
+    ));
+    assert!(reduce_checking(
+        &PCP::parse_pcp_string("Tile(100,1)Tile(10,1)"),
+        10
+    ));
+    assert!(reduce_checking(
+        &PCP::parse_pcp_string("Tile(11011,10110)Tile(011,1)"),
+        4
+    ));
+    assert!(!reduce_checking(
+        &PCP::parse_pcp_string("Tile(11011,10110)Tile(011,1)Tile(1,1101)"),
+        4
+    ));
+}
 fn sanity_check_reduce_pcp_aut() {
-    //let pcps = parse_file("a.csv").into_iter().map(|s| s.1).collect_vec();
-    let pcps = parse_instance_list("200hard.txt");
+    let pcps = parse_file("a.csv").into_iter().map(|s| s.1).collect_vec();
+    //let pcps = parse_instance_list("200hard.txt");
     let input = std::env::args().collect_vec();
     let idx = input[1].parse::<usize>().unwrap();
+    let rev = input[2].parse::<bool>().unwrap();
 
     let pcp = &pcps[idx];
+    let revpcp = pcp.reverse_pcp();
+    let pcp = if rev { &revpcp } else { pcp };
 
-    println!("pcp: {:?}", pcp);
+    println!("pcp: {:?} rev:{:?}", pcp, rev);
     let res: bool = reduce_checking(pcp, 10);
     println!("result: {:?}", res);
-    if res  {
-        panic!("fail");
-    }
 }
 
 fn main() {
-    sanity_check_reduce_pcp_aut();
+    //hard_instances_check();
+    //sanity_check_reduce_pcp_aut();
+    //println!("Hello, world!");
     //find_recursive_strings_for_pcp()
 
     //check_sanity();
@@ -1268,7 +1321,7 @@ fn main() {
     // apply_pdr_single(123, &lorents, "PCP(Vector(Tile(10, 0), Tile(0, 001), Tile(001, 1)))", false);
     //apply_pdr_single(21, &pcps[21].1, &pcps[21].0, false);
 
-    //apply_pdr();
+    apply_pdr();
 
     // apply_pdr(false);
     // for _ in 0..1000 {

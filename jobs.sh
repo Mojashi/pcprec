@@ -1,1 +1,4 @@
-parallel --shuf --bar --timeout 3060 --jobs 4 -u ./target/release/pcp-rec-str {1} {2} 30 ::: 0 1 2 3 4 6 9 12 15 17 21 22 23 24 28 29 32 34 35 36 37 38 39 40 44 45 ::: "false" "true"     
+JOBS=$(sqlite3 results.sqlite "SELECT instanceID FROM results WHERE resolved=0 ORDER BY instanceID;" | tr '\n' ' ')
+
+parallel -j 3 --timeout 20 --progress --results ./tmp/ --joblog ./tmp/parallel.log --resume-failed --resume --bar --shuf \
+    sh single_e.sh {1} {2} ::: $JOBS ::: true false

@@ -1,23 +1,10 @@
 use std::{borrow::Borrow, collections::HashSet};
 
-use crate::pcp::{Tile, PCP};
+use crate::pcp::{PCPDir, Tile, PCP};
 use itertools::Itertools;
 use regex::Regex;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-pub enum PCPDir {
-    UP,
-    DN,
-}
 
-impl PCPDir {
-    fn opposite(&self) -> PCPDir {
-        match self {
-            PCPDir::UP => PCPDir::DN,
-            PCPDir::DN => PCPDir::UP,
-        }
-    }
-}
 
 fn enumerate01strings(len: usize) -> Vec<String> {
     if len == 0 {
@@ -428,10 +415,6 @@ fn midwild_apply_test() {
     });
 }
 
-pub struct ConfAutomaton {
-    pub up: Regex,
-    pub dir: Regex,
-}
 
 impl MidWildSequence {
     fn apply_tile(&self, tile: &Tile, is_ok: &impl Fn(&PCPSequence) -> bool) -> Vec<PCPSequence> {

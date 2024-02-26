@@ -1,2 +1,2 @@
 # 0 to 200
-parallel --shuf --bar --timeout 12 --jobs 2 -u ./target/release/pcp-rec-str {1} > jobs_res/{1}.out ::: $(seq 0 200)
+parallel  --bar --shuf --timeout 600 --results ./tmp2/ --joblog ./tmp/parallel.log  --jobs 2 -u ./target/release/union_pdr2 {1} {2} ::: 0 1 2 3 4 6 9 12 15 17 21 22 23 24 28 29 32 34 35 36 37 38 39 40 44 45 ::: true false

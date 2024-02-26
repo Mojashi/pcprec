@@ -1,7 +1,6 @@
 use std::{
-    borrow::Borrow,
-    collections::{HashMap, HashSet, VecDeque},
-    fmt::format,
+    borrow::Cow,
+    collections::{BinaryHeap, HashMap, HashSet, VecDeque},
     hash::Hash,
     str::Chars,
     vec,
@@ -10,7 +9,7 @@ use std::{
 use itertools::Itertools;
 
 #[derive(Debug)]
-enum AppRegex {
+pub enum AppRegex {
     Star(Box<AppRegex>),
     Or(Box<AppRegex>, Box<AppRegex>),
     Concat(Box<AppRegex>, Box<AppRegex>),
@@ -21,6 +20,12 @@ enum AppRegex {
 #[test]
 fn test_parse() {
     let regex = AppRegex::parse("a(bddd|cf)*d");
+    println!("{:?}", regex);
+
+    let regex = AppRegex::parse("a(b|c)*d");
+    println!("{:?}", regex);
+
+    let regex = AppRegex::parse("ab*d");
     println!("{:?}", regex);
 }
 
@@ -37,7 +42,6 @@ impl AppRegex {
 
         fn parse_inner(iter: &mut Chars, until: Option<char>) -> AppRegex {
             let mut stack: Vec<AppRegex> = vec![];
-            stack.push(AppRegex::Eps);
 
             while let Some(c) = iter.next() {
                 if until == Some(c) {
@@ -64,29 +68,28 @@ impl AppRegex {
                         stack.push(AppRegex::Or(Box::new(last), Box::new(s)));
                     }
                     _ => {
-                        let last = stack.pop().unwrap();
-                        stack.push(AppRegex::Concat(Box::new(last), Box::new(AppRegex::Ch(c))));
+                        stack.push(AppRegex::Ch(c));
                     }
                 }
             }
             return stack
                 .into_iter()
                 .reduce(|a, b| AppRegex::Concat(Box::new(a), Box::new(b)))
-                .unwrap();
+                .unwrap_or(AppRegex::Eps);
         }
         parse_inner(&mut s.chars(), None)
     }
 }
 
-type State = String;
+pub type State = String;
 fn product_state(a: &State, b: &State) -> State {
     format!("({},{})", a, b)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Transition<A>
 where
-    A: Eq + std::hash::Hash + Clone,
+    A: Eq + std::hash::Hash + Clone + Ord + Ord,
 {
     pub from: State,
     pub to: State,
@@ -95,14 +98,12 @@ where
 
 fn extract_states<A>(transitions: &Vec<Transition<A>>) -> HashSet<State>
 where
-    A: Eq + std::hash::Hash + Clone,
+    A: Eq + std::hash::Hash + Clone + Ord + Ord,
 {
-    let mut states = HashSet::new();
-    for transition in transitions {
-        states.insert(transition.from.clone());
-        states.insert(transition.to.clone());
-    }
-    states
+    transitions
+        .iter()
+        .flat_map(|t| vec![t.from.clone(), t.to.clone()])
+        .collect()
 }
 
 static mut STATE_COUNTER: u64 = 0;
@@ -116,12 +117,14 @@ fn group_transitions_by_from<A>(
     transitions: Vec<Transition<A>>,
 ) -> HashMap<State, Vec<Transition<A>>>
 where
-    A: Eq + std::hash::Hash + Clone,
+    A: Eq + std::hash::Hash + Clone + Ord,
 {
-    transitions.into_iter().into_group_map_by(|t| t.from.clone())
+    transitions
+        .into_iter()
+        .into_group_map_by(|t| t.from.clone())
 }
 
-trait HasEps {
+pub trait HasEps {
     fn eps() -> Self;
 }
 
@@ -138,10 +141,10 @@ fn test_input_nfa() {
     nfa.show_dot("test_input_nfa");
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BaseAutomaton<A>
 where
-    A: Eq + std::hash::Hash + Clone + HasEps + std::fmt::Debug,
+    A: Eq + std::hash::Hash + Clone + HasEps + std::fmt::Debug + Ord,
 {
     pub transition: HashMap<State, Vec<Transition<A>>>,
     pub accept: HashSet<State>,
@@ -177,7 +180,12 @@ fn test_reachable() {
         label: Some('d'),
     });
     nfa.accept = vec![nfa.start.clone()].into_iter().collect();
-    assert!(nfa.reachable_states() == vec![nfa.start.clone(), "a2".to_string(), "a3".to_string()].into_iter().collect());
+    assert!(
+        nfa.reachable_states()
+            == vec![nfa.start.clone(), "a2".to_string(), "a3".to_string()]
+                .into_iter()
+                .collect()
+    );
 
     let rev = nfa.reversed();
     let rev_reachable = rev.reachable_states();
@@ -186,14 +194,81 @@ fn test_reachable() {
     rev.show_dot("test_reachable2");
     nfa.show_dot("test_reachable");
     println!("{:?}", rev_reachable);
-    assert!(
-        vec![nfa.start.clone(), "a2".to_string(), "a3".to_string()].into_iter()
+    assert!(vec![nfa.start.clone(), "a2".to_string(), "a3".to_string()]
+        .into_iter()
         .all(|s| rev_reachable.contains(&s)));
+}
+
+#[test]
+fn testtt() {
+    let mut h1 = HashSet::<String>::new();
+    let mut h2 = HashSet::<String>::new();
+    h1.insert("a".to_string());
+    h1.insert("b".to_string());
+    h2.insert("a".to_string());
+    h2.insert("b".to_string());
+
+    assert!(h1 == h2);
+
+    #[derive(Debug, Eq, PartialEq, Clone)]
+    struct StatePair(HashSet<State>, HashSet<State>);
+    impl Ord for StatePair {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            (other.0.len() + other.1.len()).cmp(&(self.0.len() + self.1.len()))
+        }
+    }
+    impl PartialOrd for StatePair {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    let mut h = StatePair(HashSet::new(), HashSet::new());
+    h.0.insert("a".to_string());
+    h.0.insert("b".to_string());
+    h.1.insert("a".to_string());
+    h.1.insert("b".to_string());
+    let mut h2 = StatePair(HashSet::new(), HashSet::new());
+    h2.0.insert("b".to_string());
+    h2.0.insert("a".to_string());
+    h2.0.insert("a".to_string());
+    h2.1.insert("b".to_string());
+    h2.1.insert("a".to_string());
+
+    assert!(h == h2);
+    assert!(h.0.is_subset(&h.1));
+}
+
+#[test]
+fn test_equal() {
+    let nfa_1 = NFA::from_regex(&AppRegex::parse("a(b|c)*d"));
+    let nfa_2 = NFA::from_regex(&AppRegex::parse("a(b|c)*d"));
+    assert!(nfa_1.is_equal(&nfa_2));
+
+    let nfa_1 = NFA::from_regex(&AppRegex::parse("a(b|c)*d"));
+    let nfa_2 = NFA::from_regex(&AppRegex::parse("ab(b|c)*d"));
+    assert!(!nfa_1.is_equal(&nfa_2));
+
+    let nfa_1 = NFA::from_regex(&AppRegex::parse("ab(b*)d"));
+    let nfa_2 = NFA::from_regex(&AppRegex::parse("a(b*)bd"));
+    assert!(nfa_1.is_equal(&nfa_2));
+
+    let nfa_1 = NFA::from_regex(&AppRegex::parse("ab(b*)bbbbbd"));
+    let nfa_2 = NFA::from_regex(&AppRegex::parse("abbbbbb*bd"));
+    assert!(nfa_1.is_equal(&nfa_2));
+
+    let nfa_1 = NFA::from_regex(&AppRegex::parse(""));
+    let nfa_2 = NFA::from_regex(&AppRegex::parse(""));
+    assert!(nfa_1.is_equal(&nfa_2));
+
+    let nfa_1 = NFA::from_regex(&AppRegex::parse("ab"));
+    let nfa_2 = NFA::from_regex(&AppRegex::parse("a"));
+    assert!(!nfa_1.is_equal(&nfa_2));
 }
 
 impl<A> BaseAutomaton<A>
 where
-    A: Eq + std::hash::Hash + Clone + HasEps + std::fmt::Debug,
+    A: Eq + std::hash::Hash + Clone + HasEps + std::fmt::Debug + Ord,
 {
     pub fn new() -> BaseAutomaton<A> {
         let start = new_state();
@@ -206,17 +281,19 @@ where
     }
 
     pub fn init(
-        transition: HashMap<State, Vec<Transition<A>>>,
+        transitions: Vec<Transition<A>>,
         accept: HashSet<State>,
         start: State,
     ) -> BaseAutomaton<A> {
-        let mut states = extract_states(
-            &transition
-                .clone()
-                .into_iter()
-                .flat_map(|(_, transitions)| transitions.into_iter())
-                .collect(),
-        );
+        let transitions = transitions
+            .into_iter()
+            .unique()
+            .filter(|t| !(t.label == A::eps() && t.from == t.to))
+            .collect_vec();
+        let transition_map: HashMap<State, Vec<Transition<A>>> =
+            group_transitions_by_from(transitions.clone());
+
+        let mut states = extract_states(&transitions);
         states.insert(start.clone());
         let accept = accept
             .clone()
@@ -224,7 +301,7 @@ where
             .filter(|s| states.contains(s))
             .collect();
         BaseAutomaton {
-            transition,
+            transition: transition_map,
             accept,
             start,
             states,
@@ -286,8 +363,19 @@ where
             .unwrap();
         println!("{}", String::from_utf8_lossy(&output.stdout));
     }
-    pub fn union(&self, other: &BaseAutomaton<A>) -> BaseAutomaton<A> {
-        let other = other.rename_states();
+    pub fn union(
+        &self,
+        other: &BaseAutomaton<A>,
+        rename_if_collision_state_name: bool,
+    ) -> BaseAutomaton<A> {
+        let overlap_name = self.states.intersection(&other.states).count() > 0;
+        let mut other: Cow<BaseAutomaton<A>> = Cow::Borrowed(other);
+        if rename_if_collision_state_name && overlap_name {
+            other = Cow::Owned(other.rename_states());
+        } else if overlap_name {
+            panic!("Overlap state names");
+        };
+
         let mut new_transitions: Vec<Transition<A>> = self
             .transition
             .iter()
@@ -307,7 +395,7 @@ where
         });
 
         BaseAutomaton::init(
-            group_transitions_by_from(new_transitions),
+            new_transitions,
             self.accept
                 .clone()
                 .into_iter()
@@ -318,42 +406,47 @@ where
     }
 
     pub fn rename_states(&self) -> BaseAutomaton<A> {
-        let mut new_states = HashMap::new();
-        for state in self.states.iter() {
-            new_states.insert(state, new_state());
-        }
-        let mut new_transitions: HashMap<State, Vec<Transition<A>>> = self
-            .transition
+        let new_states = self
+            .states
             .iter()
-            .map(|(from, transitions)| {
-                (
-                    new_states.get(&from).unwrap().clone(),
-                    transitions
-                        .iter()
-                        .map(|t| Transition {
-                            from: new_states.get(&t.from).unwrap().clone(),
-                            to: new_states.get(&t.to).unwrap().clone(),
-                            label: t.label.clone(),
-                        })
-                        .collect(),
-                )
-            })
+            .map(|s| (s.clone(), new_state()))
             .collect::<HashMap<_, _>>();
-
-        BaseAutomaton {
-            transition: new_transitions,
-            accept: self
-                .accept
+        let new_transitions = self
+            .transition
+            .values()
+            .flatten()
+            .map(|t| Transition {
+                from: new_states.get(&t.from).unwrap().clone(),
+                to: new_states.get(&t.to).unwrap().clone(),
+                label: t.label.clone(),
+            })
+            .collect_vec();
+        BaseAutomaton::init(
+            new_transitions,
+            self.accept
                 .iter()
                 .map(|a| new_states.get(a).unwrap().clone())
                 .collect(),
-            start: new_states.get(&self.start).unwrap().clone(),
-            states: self
-                .states
-                .iter()
-                .map(|s| new_states.get(s).unwrap().clone())
-                .collect(),
+            new_states.get(&self.start).unwrap().clone(),
+        )
+    }
+
+    pub fn concat(&self, other: &BaseAutomaton<A>) -> BaseAutomaton<A> {
+        let mut new_transitions: Vec<Transition<A>> = self
+            .transition
+            .iter()
+            .chain(other.transition.iter())
+            .flat_map(|(_, transitions)| transitions.clone().into_iter())
+            .collect_vec();
+        let new_start = self.start.clone();
+        for state in self.accept.iter() {
+            new_transitions.push(Transition {
+                from: state.clone(),
+                to: other.start.clone(),
+                label: A::eps(),
+            });
         }
+        BaseAutomaton::init(new_transitions, other.accept.clone(), new_start)
     }
 
     pub fn product_by<B, C>(
@@ -362,8 +455,8 @@ where
         map_pair: impl Fn(&A, &B) -> Option<C>,
     ) -> BaseAutomaton<C>
     where
-        B: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps,
-        C: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps,
+        B: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps + Ord,
+        C: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps + Ord,
     {
         let mut product_transitions: Vec<Transition<C>> = vec![];
 
@@ -421,7 +514,7 @@ where
         product_transitions.retain(|t| t.label != C::eps() || t.from != t.to);
 
         BaseAutomaton::init(
-            group_transitions_by_from(product_transitions),
+            product_transitions,
             self.accept
                 .iter()
                 .cartesian_product(other.accept.iter())
@@ -453,7 +546,7 @@ where
         }
 
         BaseAutomaton::init(
-            group_transitions_by_from(new_transitions),
+            new_transitions,
             vec![self.start.clone()].into_iter().collect(),
             new_start,
         )
@@ -490,66 +583,570 @@ where
             .flat_map(|(_, transitions)| transitions.clone().into_iter())
             .filter(|t| reachable.contains(&t.from) && reachable.contains(&t.to))
             .collect();
-        BaseAutomaton::init(
-            group_transitions_by_from(new_transitions),
-            self.accept.clone(),
-            self.start.clone(),
-        )
+        BaseAutomaton::init(new_transitions, self.accept.clone(), self.start.clone())
     }
 
     // A -(none)-> B -(none)-> C => A -(none)-> C
     pub fn remove_none_none_transitions(&self) -> BaseAutomaton<A> {
-        let target_to_map: HashMap<State, Vec<&Transition<A>>> = self
+        println!("{:?}", self.transition.len());
+        let mut removed_something: bool = false;
+
+        let mut transition_from_map: HashMap<String, Vec<Transition<A>>> = self.transition.clone();
+        let mut transition_to_map: HashMap<String, Vec<Transition<A>>> = self
             .transition
             .values()
             .flatten()
+            .map(|t| (*t).clone())
             .into_group_map_by(|t| t.to.clone());
-
-        let mut removed_something: bool = false;
-        let mut new_transitions: Vec<Transition<A>> =
-            self.transition.values().flatten().cloned().collect();
+        let emp_vec: Vec<Transition<A>> = vec![];
         for state in self.states.iter() {
             if *state == self.start || self.accept.contains(state) {
                 continue;
             }
-            if let Some(out_transitions) = self.transition.get(state) {
-                if let Some(in_transitions) = target_to_map.get(state) {
-                    if out_transitions.iter().all(|t| t.label == A::eps()) {
-                        if in_transitions.iter().all(|t| t.label == A::eps()) {
-                            removed_something = true;
-                            new_transitions.retain(|t| t.to != *state && t.from != *state);
-                            new_transitions.extend(
-                                in_transitions
-                                    .iter()
-                                    .cartesian_product(out_transitions.iter())
-                                    .map(|(i, o)| Transition {
-                                        from: i.from.clone(),
-                                        to: o.to.clone(),
-                                        label: A::eps(),
-                                    }),
-                            );
-                        }
+            let out_transitions = transition_from_map.get(state).unwrap_or(&emp_vec).clone();
+            if out_transitions.iter().all(|t| t.label == A::eps()) {
+                let in_transitions = transition_to_map.get(state).unwrap_or(&emp_vec).clone();
+                if in_transitions.iter().all(|t| t.label == A::eps()) {
+                    removed_something = true;
+                    for (i, o) in in_transitions
+                        .iter()
+                        .cartesian_product(out_transitions.iter())
+                    {
+                        let t = Transition {
+                            from: i.from.clone(),
+                            to: o.to.clone(),
+                            label: A::eps(),
+                        };
+                        transition_from_map
+                            .entry(i.from.clone())
+                            .or_insert(vec![])
+                            .push(t.clone());
+                        transition_to_map
+                            .entry(o.to.clone())
+                            .or_insert(vec![])
+                            .push(t);
+                    }
+                    transition_from_map.remove(state);
+                    transition_to_map.remove(state);
+                    for ot in out_transitions {
+                        transition_to_map
+                            .entry(ot.to.clone())
+                            .or_insert(vec![])
+                            .retain(|t| t.from != *state);
+                    }
+                    for it in in_transitions {
+                        transition_from_map
+                            .entry(it.from.clone())
+                            .or_insert(vec![])
+                            .retain(|t| t.to != *state);
                     }
                 }
             }
         }
         let ret = BaseAutomaton::init(
-            group_transitions_by_from(new_transitions),
+            transition_from_map
+                .values()
+                .flatten()
+                .map(|t| (*t).clone())
+                .collect(),
             self.accept.clone(),
             self.start.clone(),
-        );
+        )
+        .reduce_size_unreachable();
+        println!("done");
         if removed_something {
             ret.remove_none_none_transitions()
         } else {
             ret
         }
     }
+
+    pub fn reachable_states_with<'a>(
+        &'a self,
+        froms: &Vec<&'a State>,
+        s: &Vec<A>,
+    ) -> HashSet<State> {
+        let mut reachable: HashSet<(usize, &'a State)> = HashSet::new();
+        let mut queue: VecDeque<(usize, &'a State)> = VecDeque::new();
+
+        let s = s.into_iter().filter(|s| **s != A::eps()).collect_vec();
+
+        queue.extend(froms.iter().map(|f| (s.len(), *f)));
+        reachable.extend(froms.iter().map(|f| (s.len(), *f)));
+
+        let mut ret = HashSet::new();
+
+        while let Some((cur_s, cur_state)) = queue.pop_front() {
+            if cur_s == 0 {
+                ret.insert(cur_state.clone());
+            }
+
+            if let Some(transitions) = self.transition.get(cur_state) {
+                for transition in transitions {
+                    if transition.label == A::eps() {
+                        let new_state = (cur_s, &transition.to);
+                        if !reachable.contains(&new_state) {
+                            reachable.insert(new_state.clone());
+                            queue.push_back(new_state);
+                        }
+                    } else if cur_s > 0 && *s[s.len() - cur_s] == transition.label {
+                        let new_state = (cur_s - 1, &transition.to);
+                        if !reachable.contains(&new_state) {
+                            reachable.insert(new_state.clone());
+                            queue.push_back(new_state);
+                        }
+                    }
+                }
+            }
+        }
+
+        ret
+    }
+
+    pub fn labels(&self) -> HashSet<A> {
+        self.transition
+            .values()
+            .flatten()
+            .map(|t| t.label.clone())
+            .collect()
+    }
+
+    pub fn append_vec(&self, s: &Vec<A>) -> BaseAutomaton<A> {
+        let s = &s.into_iter().filter(|s| **s != A::eps()).collect_vec();
+        if s.len() == 0 {
+            return self.clone();
+        }
+
+        let new_states = s.iter().map(|_| new_state()).collect_vec();
+
+        let mut new_transitions: Vec<Transition<A>> =
+            self.transition.values().flatten().cloned().collect_vec();
+
+        for a in self.accept.iter() {
+            new_transitions.push(Transition {
+                from: a.clone(),
+                to: new_states[0].clone(),
+                label: s[0].clone(),
+            });
+        }
+
+        let mut cur = new_states[0].clone();
+
+        for (i, a) in s.iter().enumerate().skip(1) {
+            let next: String = new_states[i].clone();
+            new_transitions.push(Transition {
+                from: cur.clone(),
+                to: next.clone(),
+                label: (*a).clone(),
+            });
+            cur = next;
+        }
+
+        BaseAutomaton::init(
+            new_transitions,
+            [cur].into_iter().collect(),
+            self.start.clone(),
+        )
+    }
+
+    pub fn left_quotient(&self, s: &Vec<A>) -> BaseAutomaton<A> {
+        let s = &s
+            .into_iter()
+            .filter(|s| **s != A::eps())
+            .cloned()
+            .collect_vec();
+        let new_start = new_state();
+        let reachables = self.reachable_states_with(&vec![&self.start], s);
+        let start_transitions = reachables
+            .into_iter()
+            .map(|to| Transition {
+                from: new_start.clone(),
+                to: to.clone(),
+                label: A::eps(),
+            })
+            .collect_vec();
+
+        BaseAutomaton::init(
+            [
+                start_transitions,
+                self.transition.values().flatten().cloned().collect_vec(),
+            ]
+            .concat(),
+            self.accept.clone(),
+            new_start,
+        )
+    }
+
+    fn transition_with_a(&self) -> HashMap<&State, HashMap<A, HashSet<State>>> {
+        let mut labels = self.labels();
+        labels.insert(A::eps());
+        self.states
+            .iter()
+            .map(|from| {
+                let nexts = labels
+                    .iter()
+                    .map(|l| {
+                        let tos = self.reachable_states_with(&vec![&from], &vec![l.clone()]);
+                        (l.clone(), tos)
+                    })
+                    .collect();
+                (from, nexts)
+            })
+            .collect()
+    }
+
+    pub fn minimize_bisimulation(&self) -> BaseAutomaton<A> {
+        #[derive(Debug, Eq, PartialEq, Hash, Clone)]
+        struct Behaviour<A>
+        where
+            A: Eq + std::hash::Hash + Clone + Ord,
+        {
+            nexts: Vec<(A, usize)>,
+            accept_self: bool,
+        }
+        //println!("srtarting;");
+
+        let transition_a_map: HashMap<&State, HashMap<A, HashSet<State>>> =
+            self.transition_with_a();
+        let emp_set = HashSet::<State>::new();
+        let emp_vec = vec![];
+        let acceptable_states = self
+            .states
+            .iter()
+            .filter(|s| {
+                transition_a_map
+                    .get(s)
+                    .unwrap()
+                    .get(&A::eps())
+                    .unwrap_or(&emp_set)
+                    .intersection(&self.accept)
+                    .collect_vec()
+                    .len()
+                    > 0
+            })
+            .collect::<HashSet<_>>();
+
+        let transitino_to_map = transition_a_map
+            .iter()
+            .flat_map(|(from, tos)| {
+                tos.iter()
+                    .filter(|a| *a.0 != A::eps())
+                    .flat_map(move |(l, to)| {
+                        to.iter().map(move |to| Transition {
+                            from: (*from).clone(),
+                            to: to.clone(),
+                            label: l.clone(),
+                        })
+                    })
+            })
+            .into_group_map_by(|t| t.to.clone());
+        let mut num_blocks = 1;
+        let mut block_map: HashMap<State, usize> =
+            self.states.iter().map(|s| (s.clone(), 0)).collect();
+        let mut dirty_states: HashSet<State> = self.states.clone();
+        dirty_states.extend(self.states.clone());
+        while dirty_states.len() > 0 {
+            let dirty_state = dirty_states.iter().next().unwrap().clone();
+            let cur_block = block_map.get(&dirty_state).unwrap().clone();
+            let block_states: HashSet<String> = block_map
+                .iter()
+                .filter(|(_, b)| **b == cur_block)
+                .map(|(s, _)| s.clone())
+                .collect();
+            dirty_states.retain(|s| !block_states.contains(s));
+
+            let behaviour_map: HashMap<Behaviour<A>, Vec<(&State, Behaviour<A>)>> = block_states
+                .iter()
+                .map(|s| {
+                    (
+                        s,
+                        Behaviour {
+                            nexts: transition_a_map
+                                .get(s)
+                                .unwrap()
+                                .iter()
+                                .filter(|(l, _)| *l != &A::eps())
+                                .flat_map(|(l, tos)| {
+                                    tos.iter()
+                                        .map(|to| (l.clone(), block_map.get(to).unwrap().clone()))
+                                })
+                                .unique()
+                                .sorted()
+                                .collect_vec(),
+                            accept_self: acceptable_states.contains(s),
+                        },
+                    )
+                })
+                .into_group_map_by(|(_, b)| (*b).clone());
+
+            let largest_block = behaviour_map
+                .iter()
+                .max_by_key(|(_, states)| states.len())
+                .unwrap()
+                .0;
+
+            let mut changed_states: HashSet<&State> = HashSet::new();
+            for (s, b) in behaviour_map.iter() {
+                if s == largest_block {
+                    continue;
+                }
+                for (s, _) in b {
+                    block_map.insert((*s).clone(), num_blocks);
+                    changed_states.insert(s);
+                }
+                num_blocks += 1;
+            }
+
+            for d in changed_states.into_iter() {
+                transitino_to_map
+                    .get(d)
+                    .unwrap_or(&emp_vec)
+                    .iter()
+                    .for_each(|t| {
+                        dirty_states.insert(t.from.clone());
+                    });
+            }
+        }
+
+        let block_to_new_state: HashMap<usize, State> =
+            block_map.iter().map(|(s, b)| (*b, new_state())).collect();
+
+        let new_transitions: Vec<Transition<A>> = self
+            .transition
+            .values()
+            .flatten()
+            .map(|t| Transition {
+                from: block_to_new_state
+                    .get(block_map.get(&t.from).unwrap())
+                    .unwrap()
+                    .clone(),
+                to: block_to_new_state
+                    .get(block_map.get(&t.to).unwrap())
+                    .unwrap()
+                    .clone(),
+                label: t.label.clone(),
+            })
+            .unique()
+            .collect();
+
+        let new_start = block_to_new_state
+            .get(block_map.get(&self.start).unwrap())
+            .unwrap()
+            .clone();
+        let new_accept: HashSet<State> = self
+            .accept
+            .iter()
+            .map(|s| {
+                block_to_new_state
+                    .get(block_map.get(s).unwrap())
+                    .unwrap()
+                    .clone()
+            })
+            .collect();
+
+        BaseAutomaton::init(new_transitions, new_accept, new_start)
+    }
+
+    pub fn includes(&self, other: &BaseAutomaton<A>) -> bool {
+        let other = &other.rename_states();
+        let unioned = self.union(other, false);
+
+        unioned.is_equal_state(
+            &vec![self.start.clone()].into_iter().collect(),
+            &vec![self.start.clone(), other.start.clone()]
+                .into_iter()
+                .collect(),
+        )
+    }
+
+    pub fn is_equal(&self, other: &BaseAutomaton<A>) -> bool {
+        let other = &other.rename_states();
+        let unioned = self.union(other, false);
+        unioned.is_equal_state(
+            &vec![self.start.clone()].into_iter().collect(),
+            &vec![other.start.clone()].into_iter().collect(),
+        )
+    }
+
+    // Checking NFA equivalence with bisimulations up to congruence
+    pub fn is_equal_state(
+        &self,
+        self_state: &HashSet<State>,
+        other_state: &HashSet<State>,
+    ) -> bool {
+        fn normalform(ss: &HashSet<State>, relatinos: &Vec<&StatePair>) -> HashSet<State> {
+            let mut ret = ss.clone();
+            let mut used: Vec<bool> = vec![false; relatinos.len()];
+            loop {
+                let before_size = ret.len();
+                for (i, r) in relatinos.iter().enumerate() {
+                    if used[i] {
+                        continue;
+                    }
+                    if r.0.is_subset(&ret) || r.1.is_subset(&ret) {
+                        ret.extend(r.1.clone());
+                        ret.extend(r.0.clone());
+                        used[i] = true;
+                    }
+                }
+                if before_size == ret.len() {
+                    break;
+                }
+            }
+            ret
+        }
+        fn eps_closure<A>(
+            s: HashSet<State>,
+            transition_a_map: &HashMap<&State, HashMap<A, HashSet<State>>>,
+        ) -> HashSet<State>
+        where
+            A: Eq + std::hash::Hash + Clone + Ord + HasEps,
+        {
+            s.into_iter()
+                .flat_map(|s| {
+                    transition_a_map
+                        .get(&s)
+                        .unwrap()
+                        .get(&A::eps())
+                        .unwrap()
+                        .clone()
+                })
+                .collect()
+        }
+        #[derive(Debug, Eq, PartialEq, Clone)]
+        struct StatePair(HashSet<State>, HashSet<State>);
+        impl Ord for StatePair {
+            fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+                (other.0.len() + other.1.len()).cmp(&(self.0.len() + self.1.len()))
+            }
+        }
+        impl PartialOrd for StatePair {
+            fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+                Some(self.cmp(other))
+            }
+        }
+
+        let mut labels = self.labels();
+        labels.remove(&A::eps());
+        let transition_a_map = self.transition_with_a();
+        let mut todos: BinaryHeap<StatePair> = BinaryHeap::new();
+        let mut relations: Vec<StatePair> = vec![];
+        let emp_map: HashMap<A, HashSet<State>> = HashMap::new();
+        let emp_set: HashSet<State> = HashSet::new();
+
+        todos.push(StatePair(self_state.clone(), other_state.clone()));
+        while let Some(StatePair(l, r)) = todos.pop() {
+            let l = eps_closure(l, &transition_a_map);
+            let r = eps_closure(r, &transition_a_map);
+            let c = relations.iter().chain(todos.iter()).collect_vec();
+
+            if normalform(&l, &c) == normalform(&r, &c) {
+                continue;
+            }
+
+            let accept_l = l.intersection(&self.accept).count() > 0;
+            let accept_r = r.intersection(&self.accept).count() > 0;
+            if accept_l != accept_r {
+                return false;
+            }
+
+            for ch in labels.iter() {
+                let next_l: HashSet<State> = l
+                    .iter()
+                    .flat_map(|s| {
+                        transition_a_map
+                            .get(s)
+                            .unwrap_or(&emp_map)
+                            .get(&ch)
+                            .unwrap_or(&emp_set)
+                            .clone()
+                    })
+                    .collect();
+                let next_r: HashSet<State> = r
+                    .iter()
+                    .flat_map(|s| {
+                        transition_a_map
+                            .get(s)
+                            .unwrap_or(&emp_map)
+                            .get(&ch)
+                            .unwrap_or(&emp_set)
+                            .clone()
+                    })
+                    .collect();
+                todos.push(StatePair(next_l, next_r));
+            }
+            relations.push(StatePair(l, r));
+        }
+        true
+    }
+
+    pub fn reduce_size(&self) -> BaseAutomaton<A> {
+        let a = self.reduce_size_unreachable();
+        let b = a.minimize_bisimulation();
+        // assert!(a.is_equal(&b));
+        b
+    }
+
+    pub fn map_labels<B>(&self, map: impl Fn(&A) -> B) -> BaseAutomaton<B>
+    where
+        B: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps + Ord,
+    {
+        let new_transitions: Vec<Transition<B>> = self
+            .transition
+            .values()
+            .flatten()
+            .map(|t| Transition {
+                from: t.from.clone(),
+                to: t.to.clone(),
+                label: map(&t.label),
+            })
+            .collect();
+        BaseAutomaton::init(new_transitions, self.accept.clone(), self.start.clone())
+    }
+
+    pub fn merge_states(&self, merge: Vec<HashSet<&State>>) -> BaseAutomaton<A> {
+        if merge.len() == 0 {
+            return self.clone();
+        }
+
+        let state_maps: HashMap<&State, State> = merge
+            .iter()
+            .map(|s| {
+                let new_state = s.iter().next().unwrap().clone();
+                s.iter()
+                    .map(|s| (*s, new_state.clone()))
+                    .collect::<HashMap<_, _>>()
+            })
+            .flatten()
+            .collect();
+
+        let map_state = |s: &State| state_maps.get(s).unwrap_or(s).clone();
+
+        let mut new_transitions: Vec<Transition<A>> = self
+            .transition
+            .values()
+            .flatten()
+            .map(|t| Transition {
+                from: map_state(&t.from).clone(),
+                to: map_state(&t.to).clone(),
+                label: t.label.clone(),
+            })
+            .collect();
+
+        BaseAutomaton::init(
+            new_transitions,
+            self.accept.iter().map(|s| map_state(s).clone()).collect(),
+            map_state(&self.start).clone(),
+        )
+    }
 }
+
+pub type DFA<A> = BaseAutomaton<A>;
 
 impl<A, B> HasEps for (Option<A>, Option<B>)
 where
-    A: Eq + std::hash::Hash + Clone,
-    B: Eq + std::hash::Hash + Clone,
+    A: Eq + std::hash::Hash + Clone + Ord,
+    B: Eq + std::hash::Hash + Clone + Ord,
 {
     fn eps() -> (Option<A>, Option<B>) {
         (None, None)
@@ -560,8 +1157,8 @@ pub type Transducer<A, B> = BaseAutomaton<(Option<A>, Option<B>)>;
 
 impl<A, B> Transducer<A, B>
 where
-    A: Eq + std::hash::Hash + Clone + std::fmt::Debug,
-    B: Eq + std::hash::Hash + Clone + std::fmt::Debug,
+    A: Eq + std::hash::Hash + Clone + std::fmt::Debug + Ord,
+    B: Eq + std::hash::Hash + Clone + std::fmt::Debug + Ord,
 {
     pub fn inverse(&self) -> Transducer<B, A> {
         let new_transitions: Vec<Transition<(Option<B>, Option<A>)>> = self
@@ -578,26 +1175,15 @@ where
                     .collect::<Vec<_>>()
             })
             .collect_vec();
-        Transducer::init(
-            group_transitions_by_from(new_transitions),
-            self.accept.clone(),
-            self.start.clone(),
-        )
+        Transducer::init(new_transitions, self.accept.clone(), self.start.clone())
     }
+
+    pub fn get_output_nfa(&self) -> NFA<B> {
+        self.map_labels(|(_, b)| b.clone())
+    }
+
     pub fn get_input_nfa(&self) -> NFA<A> {
-        let transitions = self.transition
-            .iter()
-            .flat_map(|(_, transitions)| transitions.clone().into_iter())
-            .map(|t| Transition {
-                from: t.from.clone(),
-                to: t.to.clone(),
-                label: t.label.0,
-            });
-        NFA::init (
-            group_transitions_by_from(transitions.collect()),
-            self.accept.clone(),
-            self.start.clone(),
-        )
+        self.map_labels(|(a, _)| a.clone())
     }
 
     pub fn intersection_input(&self, nfa: &NFA<A>) -> Transducer<A, B> {
@@ -609,18 +1195,36 @@ where
             }
         })
     }
-
-    pub fn compose<C: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps>(
+    pub fn compose<C: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps + Ord>(
         &self,
         other: &Transducer<B, C>,
     ) -> Transducer<A, C> {
-        todo!()
+        self.product_by(other, |a, b| {
+            if a.1 == b.0 {
+                Some((a.0.clone(), b.1.clone()))
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn parallel<C: Eq + std::hash::Hash + Clone + std::fmt::Debug + HasEps + Ord>(
+        &self,
+        other: &Transducer<A, C>,
+    ) -> Transducer<A, (Option<B>, Option<C>)> {
+        self.product_by(other, |a, b| {
+            if a.0 == b.0 {
+                Some((a.0.clone(), Some((a.1.clone(), b.1.clone()))))
+            } else {
+                None
+            }
+        })
     }
 }
 
 impl<A> HasEps for Option<A>
 where
-    A: Eq + std::hash::Hash + Clone,
+    A: Eq + std::hash::Hash + Clone + Ord,
 {
     fn eps() -> Option<A> {
         None
@@ -649,8 +1253,66 @@ fn test_from_regex() {
     assert!(nfa.accept(&vec!['a', 'c', 'c', 'b', 'd']));
     assert!(!nfa.accept(&vec!['a', 'b', 'b', 'd', 'b', 'd']));
 }
+#[test]
+fn test_from_regex2() {
+    let r = NFA::from_regex(&AppRegex::parse("111(111)*")).reduce_size();
+    r.show_dot("test_from_regex2");
+
+    assert!(!r.accept(&vec![]));
+    assert!(r.accept(&vec!['1', '1', '1']));
+    assert!(r.accept(&vec!['1', '1', '1', '1', '1', '1']));
+    assert!(r.accept(&vec!['1', '1', '1', '1', '1', '1', '1', '1', '1']));
+}
+#[test]
+fn test_from_constant() {
+    let nfa = NFA::from_constant("abc");
+    println!("{:?}", nfa);
+    assert!(nfa.accept(&vec!['a', 'b', 'c']));
+    assert!(!nfa.accept(&vec!['a', 'b', 'c', 'd']));
+    assert!(!nfa.accept(&vec!['a', 'b']));
+    assert!(!nfa.accept(&vec!['a', 'b', 'c', 'd']));
+}
+
+#[test]
+fn test_left_quotient() {
+    let nfa = NFA::from_constant("abcded");
+    let left_quotient = nfa.left_quotient(&vec![Some('a')]);
+    println!("{:?}", left_quotient);
+    assert!(left_quotient.accept(&vec!['b', 'c', 'd', 'e', 'd']));
+    let left_quotient2 = left_quotient.left_quotient(&vec![]);
+    assert!(left_quotient.is_equal(&left_quotient2));
+
+    let left_quotient3 = left_quotient2.left_quotient(&vec![Some('b'), Some('c')]);
+    assert!(left_quotient3.accept(&vec!['d', 'e', 'd']));
+    assert!(!left_quotient3.accept(&vec!['b', 'c', 'd', 'e', 'd']));
+}
+#[test]
+fn test_left_quotient2() {
+    let nfa = NFA::from_constant("00");
+    let nfa = nfa.append_vec(&vec![Some('1')]);
+    assert!(nfa.accept(&vec!['0', '0', '1']));
+    let nfa = nfa.left_quotient(&vec![Some('0')]);
+    assert!(nfa.accept(&vec!['0', '1']));
+    let nfa = nfa.left_quotient(&vec![Some('0')]);
+    assert!(nfa.accept(&vec!['1']));
+}
 
 impl NFA<char> {
+    pub fn from_constant(s: &str) -> NFA<char> {
+        let start = new_state();
+        let mut cur = start.clone();
+        let mut transitions: Vec<Transition<Option<char>>> = vec![];
+        for c in s.chars() {
+            let next = new_state();
+            transitions.push(Transition {
+                from: cur.clone(),
+                to: next.clone(),
+                label: Some(c),
+            });
+            cur = next;
+        }
+        NFA::init(transitions, vec![cur.clone()].into_iter().collect(), start)
+    }
     pub fn from_regex(regex: &AppRegex) -> NFA<char> {
         match regex {
             AppRegex::Star(regex) => {
@@ -672,42 +1334,29 @@ impl NFA<char> {
             AppRegex::Or(left, right) => {
                 let left_nfa = NFA::from_regex(left);
                 let right_nfa = NFA::from_regex(right);
-                left_nfa.union(&right_nfa)
+                left_nfa.union(&right_nfa, true)
             }
             AppRegex::Concat(left, right) => {
-                let mut left_nfa = NFA::from_regex(left);
+                let left_nfa = NFA::from_regex(left);
                 let right_nfa = NFA::from_regex(right);
-                left_nfa.transition.extend(right_nfa.transition);
-
-                left_nfa.accept.clone().iter().for_each(|state| {
-                    left_nfa.add_transition(Transition {
-                        from: state.clone(),
-                        to: right_nfa.start.clone(),
-                        label: None,
-                    });
-                });
-
-                left_nfa.accept = right_nfa.accept;
-                left_nfa
+                left_nfa.concat(&right_nfa)
             }
             AppRegex::Ch(c) => {
-                let mut nfa = NFA::new();
-                nfa.start = new_state();
-                nfa.accept = vec![new_state()].into_iter().collect();
-                nfa.add_transition(Transition {
-                    from: nfa.start.clone(),
-                    to: nfa.accept.iter().next().unwrap().clone(),
-                    label: Some(c.clone()),
-                });
-                nfa
+                let start = new_state();
+                let accept: HashSet<State> = vec![new_state()].into_iter().collect();
+                NFA::init(
+                    vec![Transition {
+                        from: start.clone(),
+                        to: accept.iter().next().unwrap().clone(),
+                        label: Some(c.clone()),
+                    }],
+                    accept,
+                    start,
+                )
             }
             AppRegex::Eps => {
                 let start = new_state();
-                NFA::init(
-                    HashMap::new(),
-                    vec![start.clone()].into_iter().collect(),
-                    start,
-                )
+                NFA::init(vec![], vec![start.clone()].into_iter().collect(), start)
             }
         }
     }
@@ -715,7 +1364,7 @@ impl NFA<char> {
 
 impl<A> NFA<A>
 where
-    A: Eq + std::hash::Hash + Clone + std::fmt::Debug,
+    A: Eq + std::hash::Hash + Clone + std::fmt::Debug + Ord,
 {
     fn accept_from_state<'a>(
         &'a self,
@@ -766,7 +1415,7 @@ where
             visited: &mut HashSet<&'a State>,
         ) -> Option<Vec<A>>
         where
-            A: Eq + std::hash::Hash + Clone + std::fmt::Debug,
+            A: Eq + std::hash::Hash + Clone + std::fmt::Debug + Ord,
         {
             if visited.contains(cur) {
                 return None;

@@ -3,5 +3,7 @@
     "rust-analyzer.linkedProjects": [
         "./Cargo.toml",
         "./Cargo.toml"
-    ]
+    ],
+    "rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
+    "lldb.library": "/opt/homebrew/opt/llvm/lib/",
 }

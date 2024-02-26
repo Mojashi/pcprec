@@ -1,1 +1,6 @@
 /target
+tmp
+tmp2
+tmp3
+*.png
+*.dot
