@@ -1,11 +1,12 @@
 use std::{
     borrow::Cow,
-    collections::{BinaryHeap, HashMap, HashSet, VecDeque},
+    collections::{BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque},
     hash::Hash,
     str::Chars,
     vec,
 };
 
+use graphviz_rust::print;
 use itertools::Itertools;
 
 #[derive(Debug)]
@@ -55,6 +56,10 @@ impl AppRegex {
                         let last = stack.pop().unwrap();
                         stack.push(AppRegex::Star(Box::new(last)));
                     }
+                    '?' => {
+                        let last = stack.pop().unwrap();
+                        stack.push(AppRegex::Or(Box::new(AppRegex::Eps), Box::new(last)));
+                    }
                     '(' => {
                         let s = parse_inner(iter, Some(')'));
                         stack.push(s);
@@ -65,6 +70,7 @@ impl AppRegex {
                     '|' => {
                         let last = stack.pop().unwrap();
                         let s = parse_inner(iter, until);
+                        println!("{:?} \n {:?}", last, s);
                         stack.push(AppRegex::Or(Box::new(last), Box::new(s)));
                     }
                     _ => {
@@ -909,7 +915,7 @@ where
         }
 
         let block_to_new_state: HashMap<usize, State> =
-            block_map.iter().map(|(s, b)| (*b, new_state())).collect();
+            block_map.iter().map(|(_, b)| (*b, new_state())).collect();
 
         let new_transitions: Vec<Transition<A>> = self
             .transition
@@ -1112,7 +1118,7 @@ where
         let state_maps: HashMap<&State, State> = merge
             .iter()
             .map(|s| {
-                let new_state = s.iter().next().unwrap().clone();
+                let new_state = (*s.iter().next().unwrap()).clone();
                 s.iter()
                     .map(|s| (*s, new_state.clone()))
                     .collect::<HashMap<_, _>>()
@@ -1122,7 +1128,7 @@ where
 
         let map_state = |s: &State| state_maps.get(s).unwrap_or(s).clone();
 
-        let mut new_transitions: Vec<Transition<A>> = self
+        let new_transitions: Vec<Transition<A>> = self
             .transition
             .values()
             .flatten()
@@ -1138,6 +1144,121 @@ where
             self.accept.iter().map(|s| map_state(s).clone()).collect(),
             map_state(&self.start).clone(),
         )
+    }
+
+    pub fn intersection(&self, other: &BaseAutomaton<A>) -> BaseAutomaton<A> {
+        self.product_by(other, |a, b| if a == b { Some(a.clone()) } else { None })
+    }
+    pub fn difference(&self, other: &BaseAutomaton<A>) -> BaseAutomaton<A> {
+        self.intersection(&other.negate())
+    }
+
+    pub fn negate(&self) -> BaseAutomaton<A> {
+        if !self.is_deteministic() {
+            self.determinize().negate()
+        } else {
+            let new_accept: HashSet<State> = self
+                .states
+                .iter()
+                .filter(|s| !self.accept.contains(*s))
+                .cloned()
+                .collect();
+            BaseAutomaton::init(
+                self.transition.values().flatten().cloned().collect(),
+                new_accept,
+                self.start.clone(),
+            )
+        }
+    }
+
+    pub fn is_deteministic(&self) -> bool {
+        let contains_eps = self
+            .transition
+            .values()
+            .flatten()
+            .any(|t| t.label == A::eps());
+        let contains_multiple = self
+            .transition
+            .iter()
+            .any(|(_, ts)| !ts.iter().map(|t| t.label.clone()).all_unique());
+
+        !contains_eps && !contains_multiple
+    }
+
+    pub fn determinize(&self) -> BaseAutomaton<A> {
+        let trans_with_a: HashMap<&String, HashMap<A, HashSet<String>>> = self.transition_with_a();
+        let mut states_map: HashMap<BTreeSet<State>, State> = HashMap::new();
+        let mut queue: VecDeque<BTreeSet<State>> = VecDeque::new();
+        let mut transition_map: HashMap<State, HashMap<A, State>> = HashMap::new();
+        let mut new_accept: HashSet<State> = HashSet::new();
+
+        let start_set: BTreeSet<String> = trans_with_a
+            .get(&self.start)
+            .unwrap_or(&HashMap::new())
+            .get(&A::eps())
+            .unwrap_or(&HashSet::new())
+            .clone()
+            .into_iter()
+            .collect();
+        let new_start = new_state();
+        states_map.insert(start_set.clone(), new_start.clone());
+        queue.push_back(start_set.clone());
+
+        while let Some(cur) = queue.pop_front() {
+            let cur_name = states_map.get(&cur).unwrap().clone();
+
+            let mut next_map: HashMap<A, BTreeSet<State>> = cur
+                .iter()
+                .flat_map(|s| trans_with_a.get(s).unwrap().clone())
+                .fold(HashMap::new(), |mut acc, (a, tos)| {
+                    acc.entry(a.clone()).or_insert(BTreeSet::new()).extend(tos);
+                    acc
+                });
+            next_map.remove(&A::eps());
+
+            if cur.iter().any(|s| self.accept.contains(s)) {
+                new_accept.insert(cur_name.clone());
+            }
+
+            for (a, tos) in next_map.iter_mut() {
+                if tos.len() == 0 {
+                    continue;
+                }
+                let tos_state = new_state();
+                if !states_map.contains_key(&tos) {
+                    queue.push_back(tos.clone());
+                    states_map.insert(tos.clone(), tos_state);
+                };
+                if !transition_map.contains_key(&cur_name) {
+                    transition_map.insert(cur_name.clone(), HashMap::new());
+                }
+                transition_map
+                    .get_mut(&cur_name)
+                    .unwrap()
+                    .insert(a.clone(), states_map.get(tos).unwrap().clone());
+            }
+        }
+
+        let ret = BaseAutomaton::init(
+            transition_map
+                .into_iter()
+                .flat_map(|(from, tos)| {
+                    tos.iter()
+                        .map(|(a, to)| Transition {
+                            from: from.clone(),
+                            to: to.clone(),
+                            label: a.clone(),
+                        })
+                        .collect_vec()
+                })
+                .collect(),
+            new_accept,
+            new_start,
+        );
+
+        ret.show_dot("aa");
+        assert!(ret.is_deteministic());
+        ret
     }
 }
 
@@ -1402,9 +1523,6 @@ where
         self.accept_from_state(s.iter().collect(), &self.start, &mut visited)
     }
 
-    pub fn intersection(&self, other: &NFA<A>) -> NFA<A> {
-        self.product_by(other, |a, b| if a == b { Some(a.clone()) } else { None })
-    }
 
     pub fn get_element(&self) -> Option<Vec<A>> {
         let mut visited: HashSet<&State> = HashSet::new();

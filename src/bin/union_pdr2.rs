@@ -26,20 +26,25 @@ fn main() {
 
     let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(1111,11), Tile(10,111), Tile(1,1110)))").reverse_pcp();//0
 
-    let args = std::env::args().collect::<Vec<String>>();
-    let idx = args.get(1).unwrap().parse::<usize>().unwrap();
-    let rev = args.get(2).unwrap().parse::<bool>().unwrap();
-    //let idx = 31;
-    let instances = parse_file("a.csv");
-    let (raw,pcp) = instances.get(idx).unwrap().clone();
-    let pcp = if rev { pcp.reverse_pcp() } else { pcp };
-    println!("{idx} {rev} {:?}", pcp);
-    //  let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(110,1), Tile(1,0), Tile(0,110)))").reverse_pcp();//hard
-    //  let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(11011,1), Tile(0110,11), Tile(1,110)))");//hard
+    // let args = std::env::args().collect::<Vec<String>>();
+    // let idx = args.get(1).unwrap().parse::<usize>().unwrap();
+    // let rev = args.get(2).unwrap().parse::<bool>().unwrap();
+    // //let idx = 31;
+    // let instances = parse_file("a.csv");
+    // let (raw,pcp) = instances.get(idx).unwrap().clone();
+    // let pcp = if rev { pcp.reverse_pcp() } else { pcp };
+    // println!("{idx} {rev} {:?}", pcp);
 
-    //  let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(100,1)Tile(0,100)Tile(1,00))))");//solvable
-    //  let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(1111,1), Tile(10,11), Tile(1,1110)))");//20
-    //let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(1101,1), Tile(0110,11), Tile(1,110)))");//hard
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).unwrap();
+    let pcp = PCP::parse_pcp_string(input.trim());
+
+    // let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(1101,1), Tile(0110,11), Tile(1,110)))");//hard
+    // let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(11101,1), Tile(10,1110), Tile(1,10)))");//hard
+    // let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(100,1)Tile(0,100)Tile(1,00))))");//solvable
+    // let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(1111,1), Tile(10,11), Tile(1,1110)))");//20
+    // let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(11011,1), Tile(0110,11), Tile(1,110)))");//hard
+    // let pcp = PCP::parse_pcp_string("PCP(Vector(Tile(110,1), Tile(1,0), Tile(0,110)))").re;//hard
 
     union_pdr(pcp);
     //println!("finishedpcp {idx} {rev}");

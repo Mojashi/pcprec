@@ -206,11 +206,11 @@ impl<'a> Graph {
         }
         g.starts = g.nodes.iter().map(|n| n.id).collect();
 
-        g.seq_to_node(PCPConf {
-            dir: PCPDir::UP,
-            conf: NFA::from_regex(&AppRegex::parse("11(11)*")),
-            exact: None,
-        });
+        // g.seq_to_node(PCPConf {
+        //     dir: PCPDir::UP,
+        //     conf: NFA::from_regex(&AppRegex::parse("11(11)*")),
+        //     exact: None,
+        // });
 
         g.recompute_start_component();
         println!(
@@ -239,6 +239,17 @@ impl<'a> Graph {
             }
         }
         None
+    }
+
+    fn find_concretize_node_for(&self, node: &Node) -> Vec<NodeId> {
+        self.reachable.iter().filter(|other_id| {
+            let other = self.get_node(**other_id).unwrap();
+            return  node.seq.dir == other.seq.dir
+                && !other.bad
+                && node.id != other.id
+                && node.seq.conf.includes(&other.seq.conf)
+                && !other.seq.conf.includes(&node.seq.conf)
+        }).cloned().collect_vec()
     }
 
     fn seq_to_node(&'a mut self, seq: PCPConf) -> &'a Node {
@@ -352,7 +363,16 @@ impl<'a> Graph {
                         ds.retain(|s| s.len() > 1);
 
                         let mut nfa = self.nodes[node_id].seq.conf.clone();
+                        
                         to_substring_nfa(&mut nfa);
+                        if self.is_contains_bad(&PCPConf {
+                            dir: self.nodes[node_id].seq.dir,
+                            conf: nfa.clone(),
+                            exact: None,
+                        }) {
+                            nfa = self.nodes[node_id].seq.conf.clone();
+                        }
+
                         let new_nfa = nfa
                             .merge_states(ds.iter().map(|s| s.iter().collect()).collect_vec());
                         if !self.nodes[node_id].seq.conf.is_equal(&new_nfa) {
@@ -411,6 +431,18 @@ impl<'a> Graph {
         }
         if self.is_contains_bad(&node.seq) {
             self.notify_node_is_bad(node.id);
+        } else {
+            let concs = self.find_concretize_node_for(&node);
+            println!("concs {:?}", concs.len());
+            for conc in concs {
+                // if let Some(DependsOn::Abstract((_, id))) = &self.nodes[conc].depends_on {
+                //     if self.nodes[*id].seq.conf.states.len() <= node.seq.conf.states.len() {
+                //         println!("skip {:?} {:?}", node.id, id);
+                //         continue;
+                //     }
+                // }
+                self.set_node_dependency(conc, DependsOn::Abstract((None, node.id)));
+            }
         }
     }
     fn pop_dirty_node(&mut self) -> Option<NodeId> {
@@ -470,13 +502,14 @@ impl<'a> Graph {
             conf: nfa.clone(),
             exact: None,
         }) {
+            nfa = seq.conf.clone()
             // nfa = seq.conf.clone() にするより諦めた方が良さそう 1 false など
-            return DependsOn::Nexts(
-                nexts(seq, &self.pcp)
-                    .into_iter()
-                    .map(|seq| self.seq_to_node(seq).id)
-                    .collect(),
-            );
+            // return DependsOn::Nexts(
+            //     nexts(seq, &self.pcp)
+            //         .into_iter()
+            //         .map(|seq| self.seq_to_node(seq).id)
+            //         .collect(),
+            // );
         }
 
         let mut bad_merges: Vec<(&State, &State)> = vec![];
@@ -492,7 +525,7 @@ impl<'a> Graph {
                     conf: try_nfa.clone(),
                     exact: None,
                 });
-                println!("p2 {:?} ({:?} {:?}) {:?} -> {:?}", bad, s, t, nfa.states.len(), try_nfa.states.len());
+                //println!("p2 {:?} ({:?} {:?}) {:?} -> {:?}", bad, s, t, nfa.states.len(), try_nfa.states.len());
                 if !bad {
                     nfa = try_nfa;
                     ds.merge(s, t);
